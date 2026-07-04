@@ -1,0 +1,26 @@
+{
+  "name": "edumax",
+  "version": "2.0.0",
+  "description": "EduMax - Campus virtual para instituciones educativas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.3",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.10.0",
+    "compression": "^1.8.1",
+    "connect-sqlite3": "^0.9.16",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "express": "^4.22.2",
+    "express-session": "^1.19.0",
+    "memorystore": "^1.6.7",
+    "multer": "^1.4.5-lts.1"
+  }
+}

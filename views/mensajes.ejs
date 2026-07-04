@@ -1,0 +1,39 @@
+<% const titulo='Mensajes' %><%- include('partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Mensajes</h1></div></div>
+<div class="tabs" data-tabs>
+  <button class="tab-btn <%=tab==='recibidos'?'active':''%>" data-tab="recibidos">📥 Recibidos (<%= recibidos.length %>)</button>
+  <button class="tab-btn <%=tab==='enviados'?'active':''%>" data-tab="enviados">📤 Enviados (<%= enviados.length %>)</button>
+</div>
+<div id="tab-recibidos" class="tab-content <%=tab==='recibidos'?'active':''%>">
+  <% if(!recibidos.length){ %><div class="card"><div class="empty-state"><span class="icon">📭</span><h3>No tenés mensajes</h3><p>Cuando recibas mensajes de tus docentes o compañeros, van a aparecer acá.</p></div></div>
+  <% } else { recibidos.forEach(m=>{ %>
+    <div class="msg-card <%=!m.leido?'unread':''%>">
+      <div style="display:flex;justify-content:space-between"><strong><%= m.de_nombre %></strong><span style="font-size:12px;color:#9ca3af"><%= new Date(m.creado_en).toLocaleDateString('es-AR') %></span></div>
+      <% if(m.asunto){ %><div style="font-weight:600;font-size:13px;margin-top:4px"><%= m.asunto %></div><% } %>
+      <p style="font-size:14px;margin-top:6px;color:#374151"><%= m.cuerpo %></p>
+    </div>
+  <% }) } %>
+</div>
+<div id="tab-enviados" class="tab-content <%=tab==='enviados'?'active':''%>">
+  <% if(!enviados.length){ %><div class="card"><div class="empty-state"><span class="icon">✉️</span><h3>No enviaste mensajes todavía</h3><p>Usá el botón "Nuevo mensaje" para comunicarte con otros usuarios.</p></div></div>
+  <% } else { enviados.forEach(m=>{ %>
+    <div class="msg-card">
+      <div style="display:flex;justify-content:space-between"><span>Para: <strong><%= m.para_nombre %></strong></span><span style="font-size:12px;color:#9ca3af"><%= new Date(m.creado_en).toLocaleDateString('es-AR') %></span></div>
+      <% if(m.asunto){ %><div style="font-weight:600;font-size:13px;margin-top:4px"><%= m.asunto %></div><% } %>
+      <p style="font-size:14px;margin-top:6px;color:#374151"><%= m.cuerpo %></p>
+    </div>
+  <% }) } %>
+</div>
+<dialog id="modal-msg">
+  <h2>Nuevo mensaje</h2>
+  <form method="POST" action="/mensajes/enviar">
+    <div class="form-group"><label class="form-label">Para *</label>
+      <select name="para_id" required><option value="">Seleccionar...</option><% usuarios.forEach(u=>{ %><option value="<%= u.id %>"><%= u.apellido %> <%= u.nombre %> (<%= u.rol %>)</option><% }) %></select></div>
+    <div class="form-group"><label class="form-label">Asunto</label><input type="text" name="asunto"></div>
+    <div class="form-group"><label class="form-label">Mensaje *</label><textarea name="cuerpo" rows="6" required></textarea></div>
+    <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button><button type="submit" class="btn btn-primary">Enviar</button></div>
+  </form>
+</dialog>
+</div><%- include('partials/footer') %>

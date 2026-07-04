@@ -1,0 +1,38 @@
+<style>
+.site-footer{margin-top:auto;background:#0F172A;color:#CBD5E1}
+.site-footer-inner{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 1.25rem;display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap}
+.site-footer-brand{max-width:340px}
+.site-footer-brand .sf-logo{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.site-footer-brand .sf-logo span{background:linear-gradient(135deg,#25FFFF,#7B4FE8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.site-footer-brand p{font-size:13px;line-height:1.6;color:#94A3B8;margin-top:8px}
+.site-footer-cols{display:flex;gap:3rem;flex-wrap:wrap}
+.site-footer-col h4{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#64748B;margin-bottom:10px}
+.site-footer-col a{display:block;font-size:13px;color:#CBD5E1;text-decoration:none;margin-bottom:8px;transition:color .15s}
+.site-footer-col a:hover{color:#fff}
+.site-footer-bottom{border-top:1px solid #1E293B;padding:.9rem 1.5rem;text-align:center;font-size:12px;color:#64748B}
+@media(max-width:600px){.site-footer-inner{flex-direction:column;gap:1.5rem}.site-footer-cols{gap:2rem}}
+</style>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-brand">
+      <div class="sf-logo">Edu<span>Max</span></div>
+      <p>Campus virtual completo para que instituciones y docentes trabajen con sus alumnos en un solo lugar: aulas, evaluaciones, recursos y comunicación.</p>
+    </div>
+    <div class="site-footer-cols">
+      <div class="site-footer-col">
+        <h4>Plataforma</h4>
+        <a href="/acerca">Acerca de EduMax</a>
+        <a href="/ayuda">Ayuda y preguntas</a>
+        <a href="/">Ingresar al campus</a>
+      </div>
+      <div class="site-footer-col">
+        <h4>Información</h4>
+        <a href="/contacto">Contacto</a>
+        <a href="/terminos">Términos y privacidad</a>
+      </div>
+    </div>
+  </div>
+  <div class="site-footer-bottom">
+    © <%= new Date().getFullYear() %> EduMax · Campus Virtual — Hecho en Jujuy, Argentina 🇦🇷
+  </div>
+</footer>

@@ -1,0 +1,22 @@
+<% const titulo='Resultados - '+ev.titulo %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Resultados: <%= ev.titulo %></h1><p><%= ev.aula_nombre %> · <%= intentos.length %> respuestas</p></div></div>
+<% if(!intentos.length){ %>
+  <div class="card"><div class="empty-state"><span class="icon">📊</span><h3>Todavía nadie rindió esta evaluación</h3><p>Cuando tus alumnos la completen, vas a ver acá sus resultados y estadísticas.</p></div></div>
+<% } else { %>
+<div class="table-wrap">
+  <table><thead><tr><th>Alumno</th><th>Nota</th><th>Puntaje</th><th>Fecha</th></tr></thead>
+  <tbody>
+  <% intentos.forEach(i=>{ %>
+    <tr>
+      <td><strong><%= i.apellido %>, <%= i.nombre %></strong></td>
+      <td><span class="nota <%=i.nota>=7?'nota-alta':i.nota>=6?'nota-media':'nota-baja'%>"><%= i.nota?.toFixed(1) %></span></td>
+      <td><%= i.puntaje_obtenido %> / <%= i.puntaje_total %></td>
+      <td style="font-size:13px"><%= new Date(i.fecha).toLocaleDateString('es-AR') %></td>
+    </tr>
+  <% }) %>
+  </tbody></table>
+</div>
+<% } %>
+</div><%- include('../partials/footer') %>

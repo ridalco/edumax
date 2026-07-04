@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title><%= (typeof titulo!=='undefined'?titulo:'EduMax') %> · EduMax</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{display:flex;flex-direction:column;min-height:100vh;background:#fff;margin:0}
+.info-topbar{background:#0F172A;padding:.85rem 1.5rem}
+.info-topbar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.info-topbar .brand{font-size:18px;font-weight:800;color:#fff;text-decoration:none;letter-spacing:-.3px}
+.info-topbar .brand span{background:linear-gradient(135deg,#25FFFF,#7B4FE8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.info-topbar a.cta{background:#fff;color:#0F172A;padding:7px 15px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none}
+.info-page{flex:1;max-width:820px;width:100%;margin:0 auto;padding:2.5rem 1.5rem;box-sizing:border-box}
+.info-page h1{font-size:30px;font-weight:800;color:#0F172A;letter-spacing:-.5px;margin:0 0 .4rem}
+.info-page .lead{font-size:16px;color:#64748B;margin-bottom:2rem;line-height:1.6}
+.info-page h2{font-size:19px;font-weight:700;color:#0F172A;margin:2.2rem 0 .6rem}
+.info-page h3{font-size:15px;font-weight:700;color:#1E293B;margin:1.3rem 0 .3rem}
+.info-page p,.info-page li{font-size:14.5px;color:#334155;line-height:1.7}
+.info-page ul{margin:.5rem 0 1rem 1.2rem}
+.info-page li{margin-bottom:.4rem}
+.info-card{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:1.1rem 1.4rem;margin-bottom:1rem}
+.info-card h3{margin-top:0}
+.info-back{display:inline-block;margin-bottom:1.5rem;font-size:13px;color:#6366F1;text-decoration:none}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}
+</style>
+</head>
+<body>
+<div class="info-topbar"><div class="info-topbar-inner">
+  <a href="/" class="brand">Edu<span>Max</span></a>
+  <a href="/" class="cta">Ingresar al campus →</a>
+</div></div>
+<main class="info-page">

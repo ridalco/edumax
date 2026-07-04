@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title><%= codigo %> · EduMax</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Inter',sans-serif;min-height:100vh;
+  background:radial-gradient(ellipse 70% 60% at 15% 50%,#EDE8D8 0%,transparent 55%),#FAF6EB;
+  display:grid;place-items:center;padding:2rem;text-align:center;
+}
+.box{max-width:480px}
+.code{
+  font-size:96px;font-weight:900;line-height:1;letter-spacing:-4px;
+  background:linear-gradient(135deg,#122658,#7B4FE8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:1rem;
+}
+h1{font-size:24px;font-weight:800;color:#122658;margin-bottom:.75rem}
+p{font-size:15px;line-height:1.6;color:#6B7280;margin-bottom:2rem}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 28px;
+  background:linear-gradient(135deg,#122658,#1E3A8A);
+  color:white;text-decoration:none;border-radius:12px;
+  font-weight:700;font-size:14px;transition:.2s;
+  box-shadow:0 4px 14px rgba(18,38,88,0.3);
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(18,38,88,0.45)}
+.emoji{font-size:48px;margin-bottom:1rem;display:block}
+</style>
+</head>
+<body>
+<div class="box">
+  <span class="emoji"><%= codigo === 404 ? '🔍' : '⚠️' %></span>
+  <div class="code"><%= codigo %></div>
+  <h1><%= titulo %></h1>
+  <p><%= mensaje %></p>
+  <a href="<%= volver %>" class="btn">← Volver</a>
+</div>
+</body></html>

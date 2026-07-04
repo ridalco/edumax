@@ -1,0 +1,20 @@
+<% const baseUrl = user.rol==='docente' ? '/docente/aulas/'+aula.id : '/alumno/aulas/'+aula.id; %>
+<aside class="aula-sidebar">
+  <div class="aula-sidebar-title">📚 <%= aula.nombre %></div>
+  <a href="<%= baseUrl %>" class="aula-nav-item <%= (tab==='contenidos'||!tab)?'active':'' %>"><span class="aula-nav-icon">🏠</span>Inicio</a>
+  <a href="<%= baseUrl %>?tab=programa" class="aula-nav-item <%= tab==='programa'?'active':'' %>"><span class="aula-nav-icon">📋</span>Programa</a>
+  <a href="<%= baseUrl %>?tab=actividades" class="aula-nav-item <%= tab==='actividades'?'active':'' %>"><span class="aula-nav-icon">📝</span>Actividades</a>
+  <a href="<%= baseUrl %>?tab=evaluaciones" class="aula-nav-item <%= tab==='evaluaciones'?'active':'' %>"><span class="aula-nav-icon">🎯</span>Evaluaciones</a>
+  <a href="<%= baseUrl %>?tab=anuncios" class="aula-nav-item <%= tab==='anuncios'?'active':'' %>"><span class="aula-nav-icon">📢</span>Anuncios</a>
+  <a href="<%= baseUrl %>?tab=foros" class="aula-nav-item <%= tab==='foros'?'active':'' %>"><span class="aula-nav-icon">💬</span>Foros</a>
+  <a href="<%= baseUrl %>?tab=wikis" class="aula-nav-item <%= tab==='wikis'?'active':'' %>"><span class="aula-nav-icon">📖</span>Wikis</a>
+  <a href="<%= baseUrl %>?tab=encuestas" class="aula-nav-item <%= tab==='encuestas'?'active':'' %>"><span class="aula-nav-icon">📊</span>Encuestas</a>
+  <a href="<%= baseUrl %>?tab=videollamada" class="aula-nav-item <%= tab==='videollamada'?'active':'' %>"><span class="aula-nav-icon">🎥</span>Clase en vivo<% if(aula.videollamada_url){ %><span class="aula-nav-badge">●</span><% } %></a>
+  <a href="<%= baseUrl %>?tab=alumnos" class="aula-nav-item <%= tab==='alumnos'?'active':'' %>"><span class="aula-nav-icon">👥</span><%= user.rol==='docente'?'Alumnos':'Compañeros' %></a>
+  <% if(user.rol==='docente'){ %>
+  <div class="aula-sidebar-title" style="margin-top:1rem">Gestión</div>
+  <a href="/docente/aulas/<%= aula.id %>/calificaciones" class="aula-nav-item"><span class="aula-nav-icon">📊</span>Calificaciones</a>
+  <a href="/docente/aulas/<%= aula.id %>/asistencia" class="aula-nav-item"><span class="aula-nav-icon">📋</span>Asistencia</a>
+  <a href="/docente/aulas/<%= aula.id %>/preview" target="_blank" class="aula-nav-item" style="color:#EA580C"><span class="aula-nav-icon">👁️</span>Vista alumno</a>
+  <% } %>
+</aside>

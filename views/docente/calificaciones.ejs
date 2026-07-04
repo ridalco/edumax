@@ -1,0 +1,47 @@
+<% const titulo='Calificaciones - '+aula.nombre %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Calificaciones: <%= aula.nombre %></h1></div></div>
+<div class="table-wrap" style="overflow-x:auto">
+<table><thead>
+<tr>
+  <th>Alumno</th>
+  <% actividades.forEach(a=>{ %><th style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= a.titulo %>">📝 <%= a.titulo.substring(0,15) %></th><% }) %>
+  <% evaluaciones.forEach(e=>{ %><th style="font-size:11px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= e.titulo %>">🎯 <%= e.titulo.substring(0,15) %></th><% }) %>
+  <th>Promedio</th>
+</tr>
+</thead><tbody>
+<% alumnos.forEach(al=>{ %>
+  <%
+    const notasList=[];
+    actividades.forEach(a=>{
+      const e=entregas.find(e=>e.actividad_id===a.id&&e.alumno_id===al.id);
+      if(e&&e.nota!==null)notasList.push(e.nota);
+    });
+    evaluaciones.forEach(ev=>{
+      const i=intentos.find(i=>i.evaluacion_id===ev.id&&i.alumno_id===al.id);
+      if(i)notasList.push(i.nota);
+    });
+    const prom=notasList.length?Math.round(notasList.reduce((s,n)=>s+n,0)/notasList.length*10)/10:null;
+  %>
+  <tr>
+    <td><strong><%= al.apellido %>, <%= al.nombre %></strong></td>
+    <% actividades.forEach(a=>{ const e=entregas.find(e=>e.actividad_id===a.id&&e.alumno_id===al.id); %>
+      <td style="text-align:center">
+        <% if(e&&e.nota!==null){ %><span class="nota <%=e.nota>=7?'nota-alta':e.nota>=6?'nota-media':'nota-baja'%>"><%= e.nota %></span>
+        <% }else if(e){ %><span class="badge badge-yellow">S/C</span>
+        <% }else{ %><span style="color:#d1d5db">—</span><% } %>
+      </td>
+    <% }) %>
+    <% evaluaciones.forEach(ev=>{ const i=intentos.find(i=>i.evaluacion_id===ev.id&&i.alumno_id===al.id); %>
+      <td style="text-align:center">
+        <% if(i){ %><span class="nota <%=i.nota>=7?'nota-alta':i.nota>=6?'nota-media':'nota-baja'%>"><%= i.nota?.toFixed(1) %></span>
+        <% }else{ %><span style="color:#d1d5db">—</span><% } %>
+      </td>
+    <% }) %>
+    <td style="text-align:center;font-weight:700"><% if(prom!==null){ %><span class="nota <%=prom>=7?'nota-alta':prom>=6?'nota-media':'nota-baja'%>"><%= prom %></span><% }else{ %>—<% } %></td>
+  </tr>
+<% }) %>
+</tbody></table>
+</div>
+</div><%- include('../partials/footer') %>

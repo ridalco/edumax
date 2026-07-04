@@ -1,0 +1,22 @@
+<% const titulo='Nueva evaluación' %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Nueva evaluación</h1><p>Configurá la evaluación, luego agregás las preguntas</p></div></div>
+<div class="card" style="max-width:600px">
+<form method="POST" action="/docente/aulas/<%= aula.id %>/evaluaciones">
+  <div class="form-group"><label class="form-label">Título *</label><input type="text" name="titulo" required placeholder="ej: Parcial 1 - Amplificadores"></div>
+  <div class="form-group"><label class="form-label">Descripción / Instrucciones</label><textarea name="descripcion" rows="3"></textarea></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Intentos permitidos</label><input type="number" name="intentos_max" value="1" min="1" max="10"></div>
+    <div class="form-group"><label class="form-label">Tiempo límite (minutos, 0=sin límite)</label><input type="number" name="tiempo_limite" value="0" min="0"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Disponible desde</label><input type="datetime-local" name="fecha_desde"></div>
+    <div class="form-group"><label class="form-label">Disponible hasta</label><input type="datetime-local" name="fecha_hasta"></div>
+  </div>
+  <div class="modal-actions" style="justify-content:flex-start">
+    <a href="/docente/aulas/<%= aula.id %>?tab=evaluaciones" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary">Continuar → Agregar preguntas</button>
+  </div>
+</form>
+</div></div><%- include('../partials/footer') %>

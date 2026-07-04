@@ -1,0 +1,66 @@
+<% const titulo='Buscar usuarios' %><%- include('partials/header') %>
+<div class="content">
+<div class="page-header">
+  <div><h1>🔍 Buscar usuarios</h1><p>Busca por DNI, CUIL, nombre, apellido o email</p></div>
+</div>
+
+<div class="card" style="margin-bottom:1.5rem">
+  <form method="GET" action="/buscar-usuarios">
+    <div style="display:flex;gap:10px;align-items:flex-end">
+      <div class="form-group" style="flex:1;margin:0">
+        <label class="form-label">Buscar</label>
+        <input type="text" name="q" value="<%= q %>" autofocus placeholder="Ej: 27389736983, 38973698, García, ana@email.com">
+      </div>
+      <button type="submit" class="btn btn-primary">🔍 Buscar</button>
+    </div>
+    <p class="form-hint" style="margin-top:8px">💡 Probá con DNI (8 dígitos), CUIL (11 dígitos sin guiones), nombre, apellido o email.</p>
+  </form>
+</div>
+
+<% if(q && resultados.length === 0){ %>
+  <div class="card"><div class="empty-state">
+    <span class="icon">🔍</span>
+    <h3>No se encontraron resultados</h3>
+    <p>No hay usuarios que coincidan con <strong>"<%= q %>"</strong>.</p>
+    <p style="font-size:13px;margin-top:1rem">Tip: el usuario debe haberse registrado y completado su DNI/CUIL en su perfil.</p>
+  </div></div>
+<% } else if(resultados.length > 0){ %>
+  <div style="font-size:13px;color:#64748B;margin-bottom:1rem"><strong><%= resultados.length %></strong> resultado<%= resultados.length>1?'s':'' %> para "<%= q %>"</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Usuario</th><th>Rol</th><th>DNI</th><th>CUIL</th><th>Email</th><th>Acciones</th>
+      </tr></thead>
+      <tbody>
+      <% resultados.forEach(u => { %>
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="avatar avatar-sm"><%= u.nombre[0]+u.apellido[0] %></div>
+              <div>
+                <div style="font-weight:600"><%= u.apellido %>, <%= u.nombre %></div>
+                <% if(u.institucion){ %><div style="font-size:11px;color:#64748B"><%= u.institucion %></div><% } %>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge <%= u.rol==='docente'?'badge-blue':u.rol==='admin'?'badge-purple':'badge-gray' %>"><%= u.rol %></span></td>
+          <td style="font-family:monospace;font-size:12.5px"><%= u.dni||'—' %></td>
+          <td style="font-family:monospace;font-size:12.5px"><%= u.cuil||'—' %></td>
+          <td style="font-size:12.5px"><%= u.email %></td>
+          <td>
+            <a href="/mensajes?para=<%= u.id %>" class="btn btn-sm btn-secondary" title="Enviar mensaje">✉️</a>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="card"><div class="empty-state">
+    <span class="icon">🔍</span>
+    <h3>Ingresá un término de búsqueda</h3>
+    <p>Podés buscar usuarios registrados en la plataforma por su DNI, CUIL, nombre o email.</p>
+  </div></div>
+<% } %>
+
+</div><%- include('partials/footer') %>

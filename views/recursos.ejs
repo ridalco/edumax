@@ -1,0 +1,142 @@
+<% const titulo='Biblioteca de recursos' %><%- include('partials/header') %>
+<div class="topbar">
+  <div class="topbar-left"><span class="current">Biblioteca de recursos</span></div>
+  <div class="topbar-actions"><button class="btn btn-primary" onclick="document.getElementById('modal-recurso').showModal()">📤 Subir recurso</button></div>
+</div>
+<div class="content">
+
+<%# Calcular estadísticas %>
+<%
+  const totalDescargas = recursos.reduce((s,r)=>s+(r.descargas||0),0);
+  const mios = recursos.filter(r=>r.autor_id===user.id).length;
+  const compartidos = recursos.filter(r=>r.compartido===1).length;
+%>
+
+<div class="recursos-hero">
+  <h1>📚 Biblioteca de recursos</h1>
+  <p>Materiales educativos para descargar, compartir y usar en tus clases</p>
+  <div class="recursos-stats">
+    <div class="recursos-stat"><div class="recursos-stat-val"><%= recursos.length %></div><div class="recursos-stat-label">Recursos</div></div>
+    <div class="recursos-stat"><div class="recursos-stat-val"><%= mios %></div><div class="recursos-stat-label">Míos</div></div>
+    <div class="recursos-stat"><div class="recursos-stat-val"><%= compartidos %></div><div class="recursos-stat-label">Comunidad</div></div>
+    <div class="recursos-stat"><div class="recursos-stat-val"><%= totalDescargas %></div><div class="recursos-stat-label">Descargas</div></div>
+  </div>
+</div>
+
+<div class="recursos-search">
+  <span style="font-size:20px;color:#94A3B8">🔍</span>
+  <input type="text" id="search" placeholder="Buscar por título, materia, autor..." oninput="filtrarRecursos()">
+</div>
+
+<div class="recursos-chips">
+  <a href="/recursos?filtro=todos" class="recursos-chip <%= filtro==='todos'?'active':'' %>">📋 Todos (<%= recursos.length %>)</a>
+  <a href="/recursos?filtro=mios" class="recursos-chip <%= filtro==='mios'?'active':'' %>">📁 Mis recursos</a>
+  <a href="/recursos?filtro=comunidad" class="recursos-chip <%= filtro==='comunidad'?'active':'' %>">🌐 Comunidad</a>
+</div>
+
+<% if(!recursos.length){ %>
+  <div class="card"><div class="empty-state">
+    <span class="icon">📚</span>
+    <h3>Tu biblioteca está vacía</h3>
+    <p>Subí tus primeros materiales: PDFs, planificaciones, videos, links útiles. Compartilos con la comunidad docente.</p>
+    <button class="btn btn-primary" onclick="document.getElementById('modal-recurso').showModal()">📤 Subir primer recurso</button>
+  </div></div>
+<% } else { %>
+<div class="grid-auto" id="recursos-grid">
+<% recursos.forEach(r => {
+  let tipo = 'other', icon = '📁';
+  if (r.tipo === 'link') { tipo = 'link'; icon = '🔗'; }
+  else if (r.tipo === 'video') { tipo = 'video'; icon = '🎬'; }
+  else if (r.nombre_original) {
+    const n = r.nombre_original.toLowerCase();
+    if (n.endsWith('.pdf')) { tipo = 'pdf'; icon = '📄'; }
+    else if (n.match(/\.(docx?|odt)$/)) { tipo = 'word'; icon = '📝'; }
+    else if (n.match(/\.(xlsx?|csv|ods)$/)) { tipo = 'excel'; icon = '📊'; }
+    else if (n.match(/\.(pptx?|odp)$/)) { tipo = 'ppt'; icon = '📑'; }
+    else if (n.match(/\.(jpg|jpeg|png|gif|webp)$/)) { tipo = 'img'; icon = '🖼️'; }
+    else if (n.match(/\.(mp4|avi|mov|webm)$/)) { tipo = 'video'; icon = '🎬'; }
+  }
+  const ext = r.nombre_original ? r.nombre_original.split('.').pop().toUpperCase() : (r.tipo === 'link' ? 'WEB' : r.tipo === 'video' ? 'VIDEO' : '');
+%>
+  <a href="/recursos/<%= r.id %>/ver" class="recurso-card-v2" data-search="<%= (r.titulo+' '+(r.materia||'')+' '+(r.autor||'')+' '+(r.descripcion||'')).toLowerCase() %>" style="text-decoration:none;color:inherit">
+    <div class="recurso-thumb recurso-thumb-<%= tipo %>">
+      <%= icon %>
+      <% if(ext){ %><span class="recurso-thumb-tag"><%= ext %></span><% } %>
+    </div>
+    <div class="recurso-body-v2">
+      <div class="recurso-title-v2"><%= r.titulo %></div>
+      <% if(r.descripcion){ %><div class="recurso-desc-v2"><%= r.descripcion %></div><% } %>
+      <div class="recurso-tags">
+        <% if(r.materia){ %><span class="recurso-tag">📚 <%= r.materia %></span><% } %>
+        <% if(r.nivel){ %><span class="recurso-tag">🎓 <%= r.nivel %></span><% } %>
+        <% if(r.compartido && r.autor_id===user.id){ %><span class="recurso-tag compartido">✓ Compartido</span><% } %>
+      </div>
+      <div class="recurso-foot-v2">
+        <div class="recurso-autor-v2">
+          <div class="avatar avatar-sm"><%= (r.autor||'??').split(' ').map(x=>x[0]).join('').slice(0,2) %></div>
+          <div>
+            <div style="font-weight:600"><%= r.autor||'Desconocido' %></div>
+            <div style="font-size:10px;color:#94A3B8">📥 <%= r.descargas||0 %> descargas</div>
+          </div>
+        </div>
+        <div class="recurso-actions" onclick="event.stopPropagation()">
+          <a href="/recursos/<%= r.id %>/descargar" class="btn btn-sm btn-primary" title="Descargar" onclick="event.stopPropagation()"><%= r.url_externa?'↗':'⬇️' %></a>
+          <% if(r.autor_id===user.id){ %>
+            <form method="POST" action="/recursos/<%= r.id %>/eliminar" style="display:inline" onclick="event.stopPropagation()" onsubmit="return confirm('¿Eliminar este recurso? No se puede deshacer.')">
+              <button type="submit" class="btn btn-sm btn-danger" data-confirm="¿Eliminar este recurso?" title="Eliminar" onclick="event.stopPropagation()">✕</button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </a>
+<% }) %>
+</div>
+<% } %>
+
+<dialog id="modal-recurso">
+  <h2>📤 Subir nuevo recurso</h2>
+  <form method="POST" action="/recursos/nuevo" enctype="multipart/form-data">
+    <div class="form-group"><label class="form-label">Título *</label><input type="text" name="titulo" required placeholder="ej: Guía completa de transistores BJT"></div>
+    <div class="form-group"><label class="form-label">Descripción</label><textarea name="descripcion" rows="3" placeholder="¿De qué trata? ¿Para qué sirve?"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">📚 Materia</label><input type="text" name="materia" placeholder="ej: Electrónica"></div>
+      <div class="form-group"><label class="form-label">🎓 Nivel</label>
+        <select name="nivel"><option value="">-</option><option>Secundario</option><option>Terciario</option><option>Universitario</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Tipo de recurso</label>
+      <select name="tipo" id="recurso-tipo" onchange="toggleRecursoTipo(this.value)">
+        <option value="archivo">📎 Archivo (PDF, Word, Excel, imagen...)</option>
+        <option value="video">🎬 Video (link a YouTube, Vimeo...)</option>
+        <option value="link">🔗 Link / Sitio web</option>
+      </select></div>
+    <div id="campo-archivo" class="form-group"><label class="form-label">📎 Archivo (máx 50MB)</label><input type="file" name="archivo"></div>
+    <div id="campo-url" class="form-group" style="display:none"><label class="form-label">🔗 URL</label><input type="url" name="url_externa" placeholder="https://..."></div>
+    <div class="form-group" style="background:#F0FDFA;padding:14px;border-radius:10px;border:1px solid #99F6E4">
+      <label style="display:flex;align-items:center;gap:10px;text-transform:none;font-weight:600;color:#065F46;margin:0;cursor:pointer">
+        <input type="checkbox" name="compartido" value="1" style="width:18px;height:18px"> 
+        🌐 Compartir con la comunidad docente
+      </label>
+      <p style="font-size:12px;color:#0F766E;margin-top:6px;margin-left:28px">Otros docentes podrán descargarlo y usarlo en sus clases.</p>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem">
+      <button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">📤 Subir recurso</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+function toggleRecursoTipo(t){
+  document.getElementById('campo-archivo').style.display = t==='link' ? 'none' : '';
+  document.getElementById('campo-url').style.display = (t==='link'||t==='video') ? '' : 'none';
+}
+function filtrarRecursos(){
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.recurso-card-v2').forEach(card => {
+    card.style.display = card.dataset.search.includes(q) ? '' : 'none';
+  });
+}
+</script>
+</div><%- include('partials/footer') %>

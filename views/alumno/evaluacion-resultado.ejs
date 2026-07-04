@@ -1,0 +1,24 @@
+<% const titulo='Resultado: '+ev.titulo %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Resultado: <%= ev.titulo %></h1></div></div>
+<% if(intento){ %>
+<div class="card" style="text-align:center;padding:2.5rem;margin-bottom:1.5rem">
+  <div style="font-size:64px;font-weight:800;color:<%=intento.nota>=7?'#148f77':intento.nota>=6?'#f39c12':'#e74c3c'%>"><%= intento.nota?.toFixed(1) %></div>
+  <div style="font-size:16px;color:#6b7280;margin-top:8px"><%= intento.puntaje_obtenido %> de <%= intento.puntaje_total %> puntos</div>
+  <div style="font-size:14px;margin-top:8px;font-weight:600;color:<%=intento.nota>=7?'#148f77':intento.nota>=6?'#f39c12':'#e74c3c'%>">
+    <%= intento.nota>=7?'¡Aprobado! 🎉':intento.nota>=6?'Aprobado':'Desaprobado 😔' %>
+  </div>
+</div>
+<% preguntas.forEach((p,i)=>{ const resp=respuestas[p.id]||''; const esCorrecto=p.tipo!=='libre'&&resp.trim().toLowerCase()===p.respuesta_correcta?.trim().toLowerCase(); %>
+  <div class="pregunta <%=p.tipo!=='libre'?(esCorrecto?'correcta':'incorrecta'):''%>" style="margin-bottom:10px">
+    <div style="font-weight:600;font-size:14px"><%= i+1 %>. <%= p.texto %></div>
+    <div style="margin-top:8px;font-size:13px">
+      <div>Tu respuesta: <strong><%= resp||'(sin respuesta)' %></strong></div>
+      <% if(p.tipo!=='libre'&&!esCorrecto){ %><div style="color:#148f77;margin-top:4px">✓ Correcta: <strong><%= p.respuesta_correcta %></strong></div><% } %>
+    </div>
+  </div>
+<% }) %>
+<% } %>
+<a href="javascript:history.back()" class="btn btn-secondary">← Volver</a>
+</div><%- include('../partials/footer') %>

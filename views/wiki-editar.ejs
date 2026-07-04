@@ -1,0 +1,14 @@
+<% const titulo='Editar wiki' %><%- include('partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>✏️ Editar wiki</h1><p>Las wikis pueden ser editadas por todos los participantes del aula</p></div></div>
+<div class="card">
+<form method="POST" action="/wikis/<%= wiki.id %>/editar">
+  <div class="form-group"><label class="form-label">Título</label><input type="text" name="titulo" value="<%= wiki.titulo %>" required></div>
+  <div class="form-group"><label class="form-label">Contenido</label><textarea name="contenido" rows="20" required style="font-family:'Inter',sans-serif"><%= wiki.contenido %></textarea></div>
+  <div class="modal-actions" style="justify-content:flex-start">
+    <a href="/wikis/<%= wiki.id %>" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
+  </div>
+</form>
+</div></div><%- include('partials/footer') %>

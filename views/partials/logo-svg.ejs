@@ -1,0 +1,6 @@
+<% const sz = locals.size || 48; const variant = locals.variant || 'full'; %>
+<% if (variant === 'circle') { %>
+  <img src="/img/edumax-logo-circle.png" alt="EduMax" width="<%= sz %>" height="<%= sz %>" style="display:block;flex-shrink:0;border-radius:50%;object-fit:cover">
+<% } else { %>
+  <img src="/img/edumax-logo-full.png" alt="EduMax" width="<%= sz %>" height="<%= Math.round(sz * 350 / 300) %>" style="display:block;flex-shrink:0;object-fit:contain">
+<% } %>

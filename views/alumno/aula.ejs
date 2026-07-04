@@ -1,0 +1,222 @@
+<% const titulo=aula.nombre %><%- include('../partials/header') %>
+<div class="aula-breadcrumb">
+  <a href="/alumno">Mis aulas</a><span class="sep">›</span><span class="current"><%= aula.nombre %></span>
+</div>
+
+<div class="aula-layout">
+  <%- include('../partials/aula-sidebar') %>
+
+  <div class="aula-content-area">
+    <% if(typeof preview!=='undefined'&&preview){ %>
+    <div class="preview-banner">👁️ Estás viendo el aula como lo vería un alumno. <a href="/docente/aulas/<%= aula.id %>">← Volver a vista docente</a></div>
+    <% } %>
+
+    <div class="aula-hero">
+      <div>
+        <h1>📚 <%= aula.nombre %></h1>
+        <p>Docente: <strong><%= aula.docente %></strong> · <%= aula.nivel||'' %> <%= aula.anio||'' %></p>
+      </div>
+    </div>
+
+    <% if(aula.videollamada_url && (tab!=='videollamada')){ %>
+    <div class="video-banner">
+      <div class="video-icon">🎥</div>
+      <div class="video-info"><div class="video-title">Clase virtual en vivo</div><div class="video-meta"><%= aula.videollamada_horario||'Disponible' %></div></div>
+      <a href="<%= aula.videollamada_url %>" target="_blank" class="video-btn">▶ Unirse</a>
+    </div>
+    <% } %>
+
+    <% if(tab==='programa'){ %>
+    <% const unidades = {};
+       contenidos.forEach((c,i) => {
+         const u = Math.floor(i/3) + 1;
+         if(!unidades[u]) unidades[u] = [];
+         unidades[u].push(c);
+       });
+    %>
+    <% if(!contenidos.length){ %>
+      <div class="card"><div class="empty-state"><span class="icon">📋</span><h3>Programa vacío</h3><p>El docente todavía no subió contenidos</p></div></div>
+    <% } else { Object.keys(unidades).forEach(u => { %>
+      <div class="programa-seccion" id="unidad-<%= u %>">
+        <div class="programa-seccion-header">
+          <div class="programa-seccion-num"><%= u %></div>
+          <div class="programa-seccion-title">UNIDAD <%= u %></div>
+        </div>
+        <div class="programa-items">
+        <% unidades[u].forEach(c => { %>
+          <a href="/contenidos/<%= c.id %>/ver" class="programa-item">
+            <div class="programa-item-circle"></div>
+            <div class="programa-item-title"><%= c.titulo %></div>
+            <div class="programa-item-meta"><%= c.tipo.toUpperCase() %></div>
+          </a>
+        <% }) %>
+        </div>
+      </div>
+    <% }) } %>
+
+    <% } else if(tab==='actividades'){ %>
+    <% if(!actividades.length){ %><div class="card"><div class="empty-state"><span class="icon">📝</span><h3>Sin actividades</h3></div></div>
+    <% } else { actividades.forEach(a => { %>
+      <a href="/alumno/actividades/<%= a.id %>/entregar" class="contenido-item-link"><div class="contenido-item">
+        <div class="contenido-icon" style="background:#FEF3C7">📝</div>
+        <div style="flex:1"><div style="font-weight:600;font-size:14px"><%= a.titulo %></div><div style="font-size:12px;color:#64748B">Máx <%= a.puntaje_max %>pts<% if(a.fecha_entrega){ %> · Entrega: <%= new Date(a.fecha_entrega).toLocaleDateString('es-AR') %><% } %><% if(a.nota!=null){ %> · Mi nota: <strong style="color:#15803D"><%= a.nota %></strong><% } %><% if(!a.entrega_id && a.fecha_entrega && new Date(a.fecha_entrega) < new Date()){ %> · <span class="badge badge-red">Vencida</span><% } %></div></div>
+        <span class="btn btn-sm btn-primary" style="pointer-events:none"><%= a.entrega_id?'Ver entrega':'Hacer' %> →</span>
+      </div></a>
+    <% }) } %>
+
+    <% } else if(tab==='evaluaciones'){ %>
+    <% if(!evaluaciones.length){ %><div class="card"><div class="empty-state"><span class="icon">🎯</span><h3>Sin evaluaciones</h3></div></div>
+    <% } else { evaluaciones.forEach(e => { %>
+      <a href="/alumno/evaluaciones/<%= e.id %>/<%= e.mi_nota!=null ? 'resultado' : 'rendir' %>" class="contenido-item-link"><div class="contenido-item">
+        <div class="contenido-icon" style="background:#D1FAE5">🎯</div>
+        <div style="flex:1"><div style="font-weight:600;font-size:14px"><%= e.titulo %></div><div style="font-size:12px;color:#64748B"><% if(e.mi_nota!=null){ %>Mi nota: <strong><%= e.mi_nota %></strong><% } else { %>Sin rendir<% } %></div></div>
+        <span class="btn btn-sm btn-primary" style="pointer-events:none">Ver →</span>
+      </div></a>
+    <% }) } %>
+
+    <% } else if(tab==='anuncios'){ %>
+    <% if(!anuncios.length){ %><div class="card"><div class="empty-state"><span class="icon">📢</span><h3>Sin anuncios</h3></div></div>
+    <% } else { anuncios.forEach(a => { %>
+      <div class="card" style="margin-bottom:1rem">
+        <div style="font-weight:700;font-size:15px;color:#0F172A;margin-bottom:4px"><%= a.titulo %></div>
+        <div style="font-size:11px;color:#64748B;margin-bottom:8px">Por <%= a.autor %> · <%= new Date(a.creado_en).toLocaleDateString('es-AR') %></div>
+        <div style="font-size:14px;color:#334155"><%= a.cuerpo %></div>
+      </div>
+    <% }) } %>
+
+    <% } else if(tab==='foros'){ %>
+    <% if(!foros.length){ %><div class="card"><div class="empty-state"><span class="icon">💬</span><h3>Sin foros</h3></div></div>
+    <% } else { foros.forEach(f => { %>
+      <a href="/foros/<%= f.id %>" class="contenido-item-link"><div class="contenido-item">
+        <div class="contenido-icon" style="background:#EDE9FE">💬</div>
+        <div style="flex:1"><div style="font-weight:600;font-size:14px"><%= f.titulo %></div><div style="font-size:12px;color:#64748B"><%= f.hilos||0 %> temas</div></div>
+      </div></a>
+    <% }) } %>
+
+    <% } else if(tab==='wikis'){ %>
+    <% if(!wikis||!wikis.length){ %><div class="card"><div class="empty-state"><span class="icon">📖</span><h3>Sin wikis</h3></div></div>
+    <% } else { wikis.forEach(w => { %>
+      <a href="/wikis/<%= w.id %>" class="contenido-item-link"><div class="contenido-item">
+        <div class="contenido-icon" style="background:#DBEAFE">📖</div>
+        <div style="flex:1"><div style="font-weight:600;font-size:14px"><%= w.titulo %></div></div>
+      </div></a>
+    <% }) } %>
+
+    <% } else if(tab==='encuestas'){ %>
+    <% if(!encuestas||!encuestas.length){ %><div class="card"><div class="empty-state"><span class="icon">📊</span><h3>Sin encuestas</h3></div></div>
+    <% } else { encuestas.forEach(e => { const total=e.votos.reduce((s,v)=>s+v.c,0); const yaVoto=!!e.miVoto; %>
+      <div class="encuesta-card">
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">📊 <%= e.pregunta %></div>
+        <div style="font-size:12px;color:#64748B;margin-bottom:12px"><%= total %> respuestas <% if(yaVoto){ %>· <span class="badge badge-green">✓ Ya votaste</span><% } %></div>
+        <% if(!yaVoto){ %>
+          <form method="POST" action="/encuestas/<%= e.id %>/votar">
+            <% e.opciones.forEach(op=>{ %>
+              <label class="encuesta-opcion"><span><input type="<%= e.multiple?'checkbox':'radio' %>" name="opcion<% if(e.multiple){ %>[]<% } %>" value="<%= op %>" style="width:auto;margin-right:8px"> <%= op %></span></label>
+            <% }) %>
+            <button type="submit" class="btn btn-primary btn-sm" style="margin-top:12px">Votar</button>
+          </form>
+        <% } else { e.opciones.forEach(op=>{ const v=e.votos.find(x=>x.opcion===op); const c=v?v.c:0; const pct=total?Math.round(c/total*100):0; %>
+          <div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span><%= op %></span><span style="font-weight:600"><%= pct %>%</span></div><div class="encuesta-bar"><div class="encuesta-bar-fill" style="width:<%= pct %>%"></div></div></div>
+        <% }) } %>
+      </div>
+    <% }) } %>
+
+    <% } else if(tab==='videollamada'){ %>
+    <% if(aula.videollamada_url){ %>
+    <div class="video-banner">
+      <div class="video-icon">🎥</div>
+      <div class="video-info"><div class="video-title">Clase virtual en vivo</div><div class="video-meta"><%= aula.videollamada_horario||'Disponible para unirse' %></div></div>
+      <a href="<%= aula.videollamada_url %>" target="_blank" class="video-btn">▶ Unirse</a>
+    </div>
+    <% } else { %><div class="card"><div class="empty-state"><span class="icon">🎥</span><h3>Sin clase en vivo configurada</h3></div></div><% } %>
+
+    <% } else if(tab==='alumnos'){ %>
+    <% if(!alumnos.length){ %><div class="card"><div class="empty-state"><span class="icon">👥</span><h3>Sin compañeros</h3></div></div>
+    <% } else { %>
+      <div class="table-wrap"><table><thead><tr><th>Compañero</th><th>Email</th></tr></thead><tbody>
+      <% alumnos.forEach(a => { %><tr><td><strong><%= a.apellido %>, <%= a.nombre %></strong></td><td style="font-size:12px"><%= a.email %></td></tr><% }) %>
+      </tbody></table></div>
+    <% } %>
+
+    <% } else { %>
+    <% if(!contenidos.length){ %><div class="card"><div class="empty-state"><span class="icon">📚</span><h3>Sin contenidos todavía</h3><p>El docente aún no subió material</p></div></div>
+    <% } else { contenidos.forEach((c, idx)=>{
+      let fileType = 'other';
+      if (c.nombre_original) {
+        const n = c.nombre_original.toLowerCase();
+        if (n.endsWith('.pdf')) fileType = 'pdf';
+        else if (n.match(/\.(jpg|jpeg|png|gif|webp)$/)) fileType = 'image';
+        else if (n.match(/\.(mp4|webm)$/)) fileType = 'video';
+        else if (n.match(/\.(mp3|wav|m4a)$/)) fileType = 'audio';
+        else if (n.match(/\.(docx?|odt)$/)) fileType = 'word';
+        else if (n.match(/\.(xlsx?|csv|ods)$/)) fileType = 'excel';
+        else if (n.match(/\.(pptx?|odp)$/)) fileType = 'powerpoint';
+      }
+      let ytId = null, vimeoId = null;
+      if (c.url_externa) {
+        const yt = c.url_externa.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]+)/);
+        if (yt) ytId = yt[1];
+        const vm = c.url_externa.match(/vimeo\.com\/(\d+)/);
+        if (vm) vimeoId = vm[1];
+      }
+    %>
+      <div class="blog-post" id="contenido-<%= c.id %>">
+        <div class="blog-post-header">
+          <div class="blog-post-num"><%= idx+1 %></div>
+          <div style="flex:1;min-width:0">
+            <h3 class="blog-post-title"><%= c.titulo %></h3>
+            <div class="blog-post-meta">
+              <span class="badge badge-purple"><%= c.tipo.toUpperCase() %></span>
+              <% if(c.unidad){ %><span class="badge badge-blue">📋 <%= c.unidad %></span><% } %>
+              <% if(c.obligatorio){ %><span class="badge badge-red">📌 Obligatorio</span><% } %>
+            </div>
+          </div>
+          <div class="blog-post-actions">
+            <a href="/contenidos/<%= c.id %>/ver" class="btn btn-sm btn-primary">⛶ Pantalla completa</a>
+            <% if(c.archivo){ %><a href="/uploads/<%= c.archivo %>" download="<%= c.nombre_original %>" class="btn btn-sm btn-secondary" title="Descargar">⬇️</a><% } %>
+          </div>
+        </div>
+        <% if(c.descripcion){ %><p class="blog-post-desc"><%= c.descripcion %></p><% } %>
+        <div class="blog-post-content">
+          <% if(c.tipo==='texto' && c.cuerpo){ %>
+            <div class="viewer-text-rich blog-preview-text"><%- c.cuerpo %></div>
+          <% } else if(c.tipo==='embed' && c.embed_html){ %>
+            <div class="blog-preview-embed"><%- c.embed_html %></div>
+          <% } else if(c.tipo==='video' && ytId){ %>
+            <div class="blog-preview-aspect"><iframe src="https://www.youtube.com/embed/<%= ytId %>" frameborder="0" allowfullscreen></iframe></div>
+          <% } else if(c.tipo==='video' && vimeoId){ %>
+            <div class="blog-preview-aspect"><iframe src="https://player.vimeo.com/video/<%= vimeoId %>" frameborder="0" allowfullscreen></iframe></div>
+          <% } else if(c.tipo==='video' && c.url_externa){ %>
+            <div class="blog-preview-aspect"><iframe src="<%= c.url_externa %>" frameborder="0" allowfullscreen></iframe></div>
+          <% } else if(c.tipo==='imagen' && c.url_externa){ %>
+            <div class="blog-preview-image"><img src="<%= c.url_externa %>" alt="<%= c.titulo %>"></div>
+          <% } else if(fileType==='pdf'){ %>
+            <div class="pdf-wrapper" style="border-radius:10px;overflow:hidden;border:1px solid #E2E8F0">
+              <iframe
+                src="/pdfjs/viewer.html?file=/uploads/<%= encodeURIComponent(c.archivo) %>"
+                style="width:100%;height:680px;border:0;display:block"
+                allowfullscreen
+                title="<%= c.titulo %>"
+              ></iframe>
+            </div>
+          <% } else if(fileType==='image'){ %>
+            <div class="blog-preview-image"><img src="/uploads/<%= c.archivo %>" alt="<%= c.titulo %>"></div>
+          <% } else if(fileType==='video'){ %>
+            <div class="blog-preview-video"><video controls><source src="/uploads/<%= c.archivo %>"></video></div>
+          <% } else if(fileType==='audio'){ %>
+            <div class="blog-preview-audio"><audio controls style="width:100%"><source src="/uploads/<%= c.archivo %>"></audio></div>
+          <% } else if(fileType==='word'||fileType==='excel'||fileType==='powerpoint'){ %>
+            <div class="blog-preview-office">📋 <strong>Documento Office</strong> · Click en "Pantalla completa" para verlo embebido.</div>
+          <% } else if(c.tipo==='link' && c.url_externa){ %>
+            <div class="blog-preview-link"><a href="<%= c.url_externa %>" target="_blank">🔗 <%= c.url_externa %></a></div>
+          <% } else { %>
+            <div class="blog-preview-other">📁 <a href="/contenidos/<%= c.id %>/ver">Ver detalles</a></div>
+          <% } %>
+        </div>
+      </div>
+    <% }) } %>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,32 @@
+<%- include('../partials/info-top', { titulo: 'Términos y privacidad' }) %>
+<a href="/" class="info-back">← Volver al inicio</a>
+<h1>Términos y privacidad</h1>
+<p class="lead">Cómo se usa EduMax y cómo cuidamos los datos de quienes lo usan. Última actualización: <%= new Date().toLocaleDateString('es-AR',{year:'numeric',month:'long'}) %>.</p>
+
+<h2>Uso de la plataforma</h2>
+<p>EduMax es una herramienta educativa. Al usarla, docentes y alumnos se comprometen a darle un uso responsable y respetuoso: no compartir las credenciales de acceso, no subir contenido ofensivo o ilegal, y respetar el trabajo y la privacidad de los demás miembros del aula.</p>
+
+<h2>Cuentas y responsabilidades</h2>
+<ul>
+  <li>Cada persona es responsable de la actividad realizada desde su cuenta.</li>
+  <li>Las instituciones y docentes son responsables del contenido que publican en sus aulas.</li>
+  <li>El administrador puede gestionar usuarios, restablecer contraseñas y dar de baja cuentas cuando corresponda.</li>
+</ul>
+
+<h2>Qué datos guardamos</h2>
+<p>Para funcionar, EduMax almacena la información necesaria para la actividad educativa:</p>
+<ul>
+  <li>Datos de registro: nombre, apellido y correo electrónico.</li>
+  <li>Datos académicos: aulas, entregas, calificaciones y mensajes dentro de la plataforma.</li>
+  <li>Las contraseñas se guardan <strong>cifradas</strong>; nadie —ni el administrador— puede verlas.</li>
+</ul>
+
+<h2>Cómo usamos los datos</h2>
+<p>Los datos se utilizan únicamente para el funcionamiento de la plataforma: permitir el acceso, mostrar las aulas y materiales, registrar entregas y calificaciones, y posibilitar la comunicación entre docentes y alumnos. <strong>No vendemos ni cedemos los datos a terceros con fines comerciales.</strong></p>
+
+<h2>Seguridad</h2>
+<p>EduMax aplica medidas para proteger la información: conexiones cifradas (HTTPS), contraseñas protegidas, control de acceso por roles y respaldos periódicos de la base de datos. Aun así, ningún sistema es infalible; ante cualquier inconveniente de seguridad, escribinos desde <a href="/contacto">Contacto</a>.</p>
+
+<h2>Cambios</h2>
+<p>Estos términos pueden actualizarse con el tiempo. Cualquier cambio relevante se reflejará en esta misma página.</p>
+<%- include('../partials/info-bottom') %>

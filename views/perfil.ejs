@@ -1,0 +1,41 @@
+<% const titulo='Mi perfil' %><%- include('partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Mi perfil</h1></div></div>
+<div class="card" style="max-width:600px">
+<form method="POST" action="/perfil">
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid #f3f4f6">
+    <div class="avatar" style="width:64px;height:64px;font-size:22px"><%= user.nombre[0]+user.apellido[0] %></div>
+    <div>
+      <div style="font-size:18px;font-weight:700"><%= perfil.nombre %> <%= perfil.apellido %></div>
+      <div style="font-size:13px;color:#6b7280"><span class="badge badge-blue"><%= perfil.rol %></span></div>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Nombre *</label><input type="text" name="nombre" value="<%= perfil.nombre %>" required></div>
+    <div class="form-group"><label class="form-label">Apellido *</label><input type="text" name="apellido" value="<%= perfil.apellido %>" required></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Institución</label><input type="text" name="institucion" value="<%= perfil.institucion||'' %>"></div>
+    <div class="form-group"><label class="form-label">Materia</label><input type="text" name="materia" value="<%= perfil.materia||'' %>"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Biografía</label><textarea name="bio" rows="4"><%= perfil.bio||'' %></textarea></div>
+  <button type="submit" class="btn btn-primary">Guardar cambios</button>
+</form>
+</div>
+
+<%# Datos personales (DNI, CUIL, teléfono) %>
+<div class="card" style="max-width:600px;margin-top:1.5rem">
+  <div class="card-title">🪪 Datos personales</div>
+  <p style="font-size:13px;color:#64748B;margin-bottom:1rem">Estos datos son opcionales pero permiten que otros docentes/admins te puedan encontrar buscando por DNI o CUIL.</p>
+  <form method="POST" action="/perfil/datos-personales">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">DNI</label><input type="text" name="dni" value="<%= perfil.dni||'' %>" placeholder="38973698" maxlength="10"></div>
+      <div class="form-group"><label class="form-label">CUIL / CUIT</label><input type="text" name="cuil" value="<%= perfil.cuil||'' %>" placeholder="27389736983" maxlength="13"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Teléfono</label><input type="text" name="telefono" value="<%= perfil.telefono||'' %>" placeholder="+54 388 ..."></div>
+    <button type="submit" class="btn btn-primary">💾 Guardar datos personales</button>
+  </form>
+</div>
+
+</div><%- include('partials/footer') %>

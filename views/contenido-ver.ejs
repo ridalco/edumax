@@ -1,0 +1,130 @@
+<% const titulo=c.titulo %><%- include('partials/header') %>
+<div class="aula-breadcrumb">
+  <a href="<%= backUrl %>">← Volver al aula</a><span class="sep">›</span><span class="current"><%= c.titulo %></span>
+</div>
+
+<div class="content" style="max-width:1200px">
+
+<%# Header del visor %>
+<div class="viewer-header">
+  <div class="viewer-header-icon">
+    <% if(c.tipo==='texto'){ %>📄
+    <% } else if(c.tipo==='embed'){ %>⚡
+    <% } else if(c.tipo==='imagen'){ %>🖼️
+    <% } else if(fileType==='pdf'){ %>📄
+    <% } else if(fileType==='image'){ %>🖼️
+    <% } else if(fileType==='video'){ %>🎬
+    <% } else if(fileType==='audio'){ %>🎵
+    <% } else if(fileType==='word'){ %>📝
+    <% } else if(fileType==='excel'){ %>📊
+    <% } else if(fileType==='powerpoint'){ %>📑
+    <% } else if(c.tipo==='link'){ %>🔗
+    <% } else if(c.tipo==='video'){ %>🎬
+    <% } else { %>📁<% } %>
+  </div>
+  <div style="flex:1">
+    <h1><%= c.titulo %></h1>
+    <p>
+      <%= c.aula_nombre %>
+      <% if(c.unidad){ %> · <span class="badge badge-purple"><%= c.unidad %></span><% } %>
+      <% if(c.obligatorio){ %> · <span class="badge badge-red">📌 Obligatorio</span><% } %>
+      <% if(c.nombre_original){ %> · <%= c.nombre_original %><% } %>
+    </p>
+    <% if(c.descripcion){ %><p style="margin-top:8px;color:#475569"><%= c.descripcion %></p><% } %>
+  </div>
+  <div style="display:flex;gap:8px;align-self:center;flex-shrink:0">
+    <% if(c.archivo){ %><a href="/uploads/<%= c.archivo %>" download="<%= c.nombre_original %>" class="btn btn-sm btn-secondary">⬇️ Descargar</a><% } %>
+    <% if(c.url_externa){ %><a href="<%= c.url_externa %>" target="_blank" class="btn btn-sm btn-secondary">↗️ Abrir</a><% } %>
+  </div>
+</div>
+
+<%# Progreso %>
+<% if(total > 1){ %>
+<div style="background:white;border-radius:10px;padding:10px 16px;margin-bottom:1rem;border:1px solid #E2E8F0;display:flex;align-items:center;gap:12px">
+  <span style="font-size:12px;color:#64748B;font-weight:500">Progreso del aula:</span>
+  <div style="flex:1;background:#F1F5F9;height:8px;border-radius:4px;overflow:hidden"><div style="background:linear-gradient(90deg,#6366F1,#A855F7);height:100%;width:<%= Math.round(current/total*100) %>%"></div></div>
+  <span style="font-size:12px;color:#0F172A;font-weight:700"><%= current %> / <%= total %></span>
+</div>
+<% } %>
+
+<%# CONTENIDO %>
+<div class="viewer-container">
+<% if(c.tipo==='texto'){ %>
+  <div class="viewer-text-rich"><%- c.cuerpo %></div>
+<% } else if(c.tipo==='embed' && c.embed_html){ %>
+  <div class="viewer-embed"><%- c.embed_html %></div>
+<% } else if(c.tipo==='video' && ytId){ %>
+  <div class="viewer-aspect"><iframe src="https://www.youtube.com/embed/<%= ytId %>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+<% } else if(c.tipo==='video' && vimeoId){ %>
+  <div class="viewer-aspect"><iframe src="https://player.vimeo.com/video/<%= vimeoId %>" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<% } else if(c.tipo==='video' && c.url_externa){ %>
+  <div class="viewer-aspect"><iframe src="<%= c.url_externa %>" frameborder="0" allowfullscreen></iframe></div>
+<% } else if(c.tipo==='link'){ %>
+  <div class="alert alert-info" style="margin:1rem">🔗 Enlace externo. Algunos sitios no permiten incrustarse, en ese caso usá "Abrir" arriba.</div>
+  <div class="viewer-iframe"><iframe src="<%= c.url_externa %>" frameborder="0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe></div>
+<% } else if(c.tipo==='imagen' && c.url_externa){ %>
+  <div class="viewer-image"><img src="<%= c.url_externa %>" alt="<%= c.titulo %>"></div>
+<% } else if(fileType==='pdf'){ %>
+  <div class="viewer-pdf-full">
+    <iframe
+      src="/pdfjs/viewer.html?file=/uploads/<%= encodeURIComponent(c.archivo) %>"
+      style="width:100%;height:85vh;display:block;border:0"
+      allowfullscreen
+    ></iframe>
+  </div>
+<% } else if(fileType==='image'){ %>
+  <div class="viewer-image"><img src="/uploads/<%= c.archivo %>" alt="<%= c.titulo %>"></div>
+<% } else if(fileType==='video'){ %>
+  <div class="viewer-video"><video controls><source src="/uploads/<%= c.archivo %>"></video></div>
+<% } else if(fileType==='audio'){ %>
+  <div class="viewer-audio">
+    <div style="font-size:64px;text-align:center;margin-bottom:1rem">🎵</div>
+    <audio controls style="width:100%"><source src="/uploads/<%= c.archivo %>"></audio>
+  </div>
+<% } else if(fileType==='word'||fileType==='excel'||fileType==='powerpoint'){ %>
+  <div class="alert alert-info" style="margin:1rem">📋 Documento Office cargado con visor de Microsoft. Esperá unos segundos a que cargue.</div>
+  <div class="viewer-iframe"><iframe src="https://view.officeapps.live.com/op/embed.aspx?src=<%= encodeURIComponent('https://' + host + '/uploads/' + c.archivo) %>" frameborder="0"></iframe></div>
+<% } else { %>
+  <div class="viewer-fallback">
+    <div style="font-size:80px;margin-bottom:1rem">📁</div>
+    <h3>No se puede previsualizar este archivo</h3>
+    <p>El formato no soporta vista previa, pero podés descargarlo:</p>
+    <% if(c.archivo){ %><a href="/uploads/<%= c.archivo %>" download="<%= c.nombre_original %>" class="btn btn-primary" style="margin-top:1rem">⬇️ Descargar <%= c.nombre_original %></a><% } %>
+  </div>
+<% } %>
+</div>
+
+<%# Navegación anterior / siguiente %>
+<div class="viewer-nav">
+  <% if(prev){ %>
+    <a href="/contenidos/<%= prev.id %>/ver" class="viewer-nav-btn viewer-nav-prev">
+      <div class="viewer-nav-arrow">←</div>
+      <div>
+        <div class="viewer-nav-lbl">ANTERIOR</div>
+        <div class="viewer-nav-title"><%= prev.titulo %></div>
+      </div>
+    </a>
+  <% } else { %><div></div><% } %>
+  
+  <a href="<%= backUrl %>" class="btn btn-secondary" style="align-self:center">📋 Ver programa completo</a>
+  
+  <% if(next){ %>
+    <a href="/contenidos/<%= next.id %>/ver" class="viewer-nav-btn viewer-nav-next">
+      <div style="text-align:right">
+        <div class="viewer-nav-lbl">SIGUIENTE</div>
+        <div class="viewer-nav-title"><%= next.titulo %></div>
+      </div>
+      <div class="viewer-nav-arrow">→</div>
+    </a>
+  <% } else { %>
+    <div class="viewer-nav-btn viewer-nav-next" style="background:linear-gradient(135deg,#10B981,#14B8A6);color:white;cursor:default">
+      <div style="text-align:right">
+        <div class="viewer-nav-lbl" style="opacity:.9">✓ COMPLETADO</div>
+        <div class="viewer-nav-title">¡Llegaste al final!</div>
+      </div>
+      <div class="viewer-nav-arrow">🎉</div>
+    </div>
+  <% } %>
+</div>
+
+</div><%- include('partials/footer') %>

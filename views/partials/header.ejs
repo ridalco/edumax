@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title><%= typeof titulo!=='undefined'?titulo+' · EduMax':'EduMax' %></title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<%# ===== TOPBAR HORIZONTAL (estilo Educativa) ===== %>
+<header class="topnav">
+  <div class="topnav-inner">
+        <a href="/" class="topnav-brand">
+      <div class="topnav-logo-icon">
+        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="38" height="38">
+          <rect width="60" height="60" rx="12" fill="white" fill-opacity="0.12"/>
+          <defs>
+            <linearGradient id="tlg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#25FFFF"/>
+              <stop offset="100%" stop-color="#7B4FE8"/>
+            </linearGradient>
+          </defs>
+          <path d="M8 44 L8 18 Q8 14 12 13 L27 10 Q30 9 30 12 L30 47 Q30 48 28 49 L10 49 Q8 49 8 44Z" fill="url(#tlg)" opacity="0.9"/>
+          <path d="M52 44 L52 18 Q52 14 48 13 L33 10 Q30 9 30 12 L30 47 Q30 48 32 49 L50 49 Q52 49 52 44Z" fill="url(#tlg)" opacity="0.9"/>
+          <rect x="28" y="9" width="4" height="41" rx="1" fill="rgba(0,0,50,0.4)"/>
+          <line x1="30" y1="46" x2="30" y2="30" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <path d="M30 40 Q24 35 19 29" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <path d="M30 40 Q36 35 41 29" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <path d="M30 34 Q25 29 21 24" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <path d="M30 34 Q35 29 39 24" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <path d="M30 28 Q26 23 23 18" stroke="white" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+          <path d="M30 28 Q34 23 37 18" stroke="white" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+          <line x1="30" y1="28" x2="30" y2="16" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="topnav-brand-name"><span style="color:white">Edu</span><span style="background:linear-gradient(135deg,#25FFFF,#7B4FE8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Max</span></div>
+        <div class="topnav-brand-sub">Campus Virtual</div>
+      </div>
+    </a>
+
+    <nav class="topnav-menu">
+      <% if(user.rol==='admin'){ %>
+        <a href="/admin" class="topnav-link <%=path==='/admin'?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Panel</a>
+        <a href="/admin/usuarios" class="topnav-link <%=path.startsWith('/admin/usuarios')?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Usuarios</a>
+      <% } else if(user.rol==='docente'){ %>
+        <a href="/docente" class="topnav-link <%=(path==='/docente'||path.startsWith('/docente/aulas'))?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Mis aulas</a>
+        <a href="/recursos" class="topnav-link <%=path.startsWith('/recursos')?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recursos</a>
+        <a href="/docente/ia" class="topnav-link <%=path.startsWith('/docente/ia')?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M12 3l1.9 5.8L19.7 10l-5.8 1.9L12 17.7l-1.9-5.8L4.3 10l5.8-1.9z"/></svg>Asistente IA</a>
+        <a href="/buscar-usuarios" class="topnav-link <%=path.startsWith('/buscar-usuarios')?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Buscar</a>
+      <% } else { %>
+        <a href="/alumno" class="topnav-link <%=(path==='/alumno'||path.startsWith('/alumno/aulas'))?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Mis aulas</a>
+        <a href="/alumno/inscribirse" class="topnav-link <%=path==='/alumno/inscribirse'?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Inscribirse</a>
+        <a href="/recursos" class="topnav-link <%=path.startsWith('/recursos')?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Catálogo</a>
+      <% } %>
+      <a href="/mensajes" class="topnav-link <%=path.startsWith('/mensajes')?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 5L2 7"/></svg>Mensajes<% if(mensajesNoLeidos>0){ %> <span class="topnav-badge"><%= mensajesNoLeidos %></span><% } %></a>
+      <a href="/calendario" class="topnav-link <%=path.startsWith('/calendario')?'active':''%>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendario</a>
+    </nav>
+
+    <div class="topnav-user">
+      <span class="topnav-user-name"><%= user.nombre %> <%= user.apellido %></span>
+      <a href="/perfil" class="topnav-avatar" title="Mi perfil"><%= user.nombre[0]+user.apellido[0] %></a>
+      <a href="/logout" class="topnav-logout" title="Cerrar sesión"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a>
+    </div>
+  </div>
+</header>
+
+<div class="page-wrapper">

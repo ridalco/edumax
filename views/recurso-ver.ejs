@@ -1,0 +1,62 @@
+<% const titulo=r.titulo %><%- include('partials/header') %>
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="/recursos">← Volver a recursos</a><span class="sep">/</span>
+    <span class="current"><%= r.titulo %></span>
+  </div>
+  <div class="topbar-actions">
+    <a href="/recursos/<%= r.id %>/descargar" class="btn btn-sm btn-primary">⬇️ Descargar</a>
+  </div>
+</div>
+<div class="content">
+
+<div class="viewer-header">
+  <div class="viewer-header-icon">
+    <% if(fileType==='pdf'){ %>📄
+    <% } else if(fileType==='image'){ %>🖼️
+    <% } else if(fileType==='video'){ %>🎬
+    <% } else if(fileType==='word'){ %>📝
+    <% } else if(fileType==='excel'){ %>📊
+    <% } else if(fileType==='powerpoint'){ %>📑
+    <% } else if(r.tipo==='link'){ %>🔗
+    <% } else { %>📁<% } %>
+  </div>
+  <div>
+    <h1><%= r.titulo %></h1>
+    <p>
+      Por <strong><%= r.autor %></strong>
+      <% if(r.materia){ %> · <%= r.materia %><% } %>
+      <% if(r.nivel){ %> · <%= r.nivel %><% } %>
+      · 📥 <%= r.descargas %> descargas
+    </p>
+    <% if(r.descripcion){ %><p style="margin-top:8px"><%= r.descripcion %></p><% } %>
+  </div>
+</div>
+
+<div class="viewer-container">
+<% if(r.tipo==='video' && ytId){ %>
+  <div class="viewer-aspect"><iframe src="https://www.youtube.com/embed/<%= ytId %>" frameborder="0" allowfullscreen></iframe></div>
+<% } else if(r.tipo==='video' && vimeoId){ %>
+  <div class="viewer-aspect"><iframe src="https://player.vimeo.com/video/<%= vimeoId %>" frameborder="0" allowfullscreen></iframe></div>
+<% } else if(r.tipo==='link'){ %>
+  <div class="alert alert-info" style="margin-bottom:1rem">🔗 Enlace externo. Si no carga abajo, abrilo en pestaña.</div>
+  <div class="viewer-iframe"><iframe src="<%= r.url_externa %>" frameborder="0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe></div>
+<% } else if(fileType==='pdf'){ %>
+  <div class="viewer-iframe"><iframe src="/uploads/<%= r.archivo %>#toolbar=1" frameborder="0"></iframe></div>
+<% } else if(fileType==='image'){ %>
+  <div class="viewer-image"><img src="/uploads/<%= r.archivo %>" alt="<%= r.titulo %>"></div>
+<% } else if(fileType==='video'){ %>
+  <div class="viewer-video"><video controls><source src="/uploads/<%= r.archivo %>"></video></div>
+<% } else if(fileType==='word'||fileType==='excel'||fileType==='powerpoint'){ %>
+  <div class="alert alert-info" style="margin-bottom:1rem">📋 Documento Office cargado con visor de Microsoft.</div>
+  <div class="viewer-iframe"><iframe src="https://view.officeapps.live.com/op/embed.aspx?src=<%= encodeURIComponent('https://' + (host || 'edumax-production.up.railway.app') + '/uploads/' + r.archivo) %>" frameborder="0"></iframe></div>
+<% } else { %>
+  <div class="viewer-fallback">
+    <div style="font-size:80px;margin-bottom:1rem">📁</div>
+    <h3>No se puede previsualizar este archivo</h3>
+    <a href="/recursos/<%= r.id %>/descargar" class="btn btn-primary" style="margin-top:1rem">⬇️ Descargar</a>
+  </div>
+<% } %>
+</div>
+
+</div><%- include('partials/footer') %>

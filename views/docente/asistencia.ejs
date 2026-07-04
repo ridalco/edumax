@@ -1,0 +1,37 @@
+<% const titulo='Asistencia - '+aula.nombre %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Asistencia: <%= aula.nombre %></h1></div></div>
+<div class="card" style="margin-bottom:1rem">
+  <form method="GET" style="display:flex;align-items:center;gap:1rem">
+    <div class="form-group" style="margin:0"><label class="form-label">Fecha</label><input type="date" name="fecha" value="<%= fecha %>"></div>
+    <button type="submit" class="btn btn-secondary" style="margin-top:20px">Ver</button>
+  </form>
+</div>
+<form method="POST" action="/docente/aulas/<%= aula.id %>/asistencia">
+  <input type="hidden" name="fecha" value="<%= fecha %>">
+  <input type="hidden" name="asistencias" id="asistencias-data">
+  <div class="table-wrap">
+    <table><thead><tr><th>Alumno</th><th style="text-align:center;width:120px">Presente</th><th style="text-align:center;width:120px">Ausente</th></tr></thead>
+    <tbody>
+    <% alumnos.forEach(a=>{ %>
+      <tr>
+        <td><strong><%= a.apellido %>, <%= a.nombre %></strong></td>
+        <td style="text-align:center"><input type="radio" name="a_<%= a.id %>" value="1" <%=a.presente===1?'checked':''%>></td>
+        <td style="text-align:center"><input type="radio" name="a_<%= a.id %>" value="0" <%=a.presente!==1?'checked':''%>></td>
+      </tr>
+    <% }) %>
+    </tbody></table>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:1rem">
+    <button type="button" class="btn btn-secondary" onclick="marcar(1)">Todos presentes</button>
+    <button type="button" class="btn btn-secondary" onclick="marcar(0)">Todos ausentes</button>
+    <button type="submit" class="btn btn-primary" onclick="prepAsistencia()">💾 Guardar</button>
+  </div>
+</form>
+<script>
+const ids=[<%=alumnos.map(a=>a.id).join(',')%>];
+function marcar(v){ids.forEach(id=>{const r=document.querySelector(`[name=a_${id}][value="${v}"]`);if(r)r.checked=true;})}
+function prepAsistencia(){document.getElementById('asistencias-data').value=JSON.stringify(ids.map(id=>({id,presente:document.querySelector(`[name=a_${id}][value="1"]`)?.checked?1:0})));}
+</script>
+</div><%- include('../partials/footer') %>

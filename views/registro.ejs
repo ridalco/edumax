@@ -1,0 +1,219 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crear cuenta · EduMax</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',sans-serif}
+body{min-height:100vh;background:radial-gradient(ellipse 70% 60% at 15% 50%,#EDE8D8 0%,transparent 55%),radial-gradient(ellipse 50% 50% at 85% 80%,#E8E0CC 0%,transparent 50%),#FAF6EB;display:grid;place-items:center;padding:1.5rem}
+.wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:4rem;width:100%;max-width:1200px;min-height:calc(100vh - 3rem);align-items:center}
+@media(max-width:920px){.wrap{grid-template-columns:1fr;gap:2rem;min-height:auto}.left{display:none}}
+.logo-img{width:100%;max-width:480px;height:auto;display:block;margin-bottom:2rem;border-radius:16px;box-shadow:0 2px 16px rgba(18,38,88,0.07)}
+.headline{font-size:28px;font-weight:900;color:#122658;letter-spacing:-.5px;line-height:1.2;margin-bottom:.75rem}
+.headline em{font-style:normal;background:linear-gradient(135deg,#0077CC,#8442E0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.subline{font-size:15px;line-height:1.65;color:#6B7280;margin-bottom:2rem}
+.feats{display:flex;flex-direction:column;gap:.6rem}
+.feat{display:flex;align-items:center;gap:12px;padding:11px 15px;background:rgba(255,255,255,0.55);border:1px solid rgba(18,38,88,0.08);border-radius:12px}
+.fi{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fi1{background:linear-gradient(135deg,#005B99,#00BBDD)}.fi2{background:linear-gradient(135deg,#5B1FA8,#8442E0)}.fi3{background:linear-gradient(135deg,#7A4A00,#D89C1A)}
+.feat strong{font-size:13.5px;font-weight:700;color:#1E2A5A;display:block;margin-bottom:1px}
+.feat span{font-size:12px;color:#6B7280}
+.right{display:flex;flex-direction:column;justify-content:center}
+.card{background:white;border-radius:24px;padding:2.25rem 2rem;box-shadow:0 4px 6px rgba(0,0,0,0.04),0 12px 24px rgba(18,38,88,0.10),0 32px 48px rgba(18,38,88,0.06);border:1px solid rgba(18,38,88,0.06)}
+.card-brand{margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid #F1F5F9}
+.card-brand-name{display:flex;align-items:baseline;font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1;margin-bottom:3px}
+.edu{color:#122658}.max{background:linear-gradient(135deg,#0077CC,#8442E0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.card-brand-tag{font-size:10px;font-weight:700;letter-spacing:3px;color:#9CA3AF;text-transform:uppercase}
+.card-title{font-size:21px;font-weight:800;color:#0F172A;margin:0 0 4px;letter-spacing:-.4px}
+.card-sub{font-size:13px;color:#9CA3AF;margin:0 0 1.25rem}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.fg{margin-bottom:.85rem}
+.lbl{display:block;font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1.3px;margin-bottom:5px}
+.lbl .req{color:#EF4444}
+.inp{width:100%;padding:11px 14px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;font-size:14px;color:#0F172A;font-family:'Inter',sans-serif;transition:.15s;outline:none}
+.inp::placeholder{color:#CBD5E1}
+.inp:focus{border-color:#0077CC;background:white;box-shadow:0 0 0 3px rgba(0,119,204,0.10)}
+.inp.valid{border-color:#22C55E;background:#F0FDF4}
+.inp.invalid{border-color:#EF4444;background:#FEF2F2}
+select.inp{cursor:pointer}
+.pwd-wrap{position:relative}
+.pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94A3B8;font-size:12px;font-weight:600;padding:4px}
+.pwd-toggle:hover{color:#0077CC}
+/* Medidor de fortaleza */
+.pwd-meter{display:flex;gap:4px;margin-top:6px}
+.pwd-bar{height:4px;flex:1;background:#E2E8F0;border-radius:2px;transition:.3s}
+.pwd-bar.active-weak{background:#EF4444}
+.pwd-bar.active-medium{background:#F59E0B}
+.pwd-bar.active-strong{background:#22C55E}
+.pwd-hint{font-size:11px;margin-top:4px;color:#94A3B8}
+.pwd-hint.weak{color:#EF4444}.pwd-hint.medium{color:#F59E0B}.pwd-hint.strong{color:#22C55E}
+.field-msg{font-size:11px;margin-top:4px;min-height:14px}
+.field-msg.error{color:#EF4444}
+.field-msg.ok{color:#22C55E}
+.btn{width:100%;padding:13px;margin-top:.5rem;background:linear-gradient(135deg,#122658 0%,#1E3A8A 100%);color:white;border:none;border-radius:11px;font-weight:800;font-size:15px;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif;box-shadow:0 4px 14px rgba(18,38,88,0.30)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(18,38,88,0.45)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.auth-sec{text-align:center;margin-top:.9rem;font-size:13px;color:#9CA3AF}
+.auth-sec a{color:#0077CC;font-weight:700;text-decoration:none}
+.err{background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;border-radius:9px;padding:10px 13px;font-size:13px;margin-bottom:1rem}
+footer{text-align:center;padding-top:1.5rem;font-size:11.5px;color:#C4BAA4;grid-column:1/-1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="left">
+    <img src="/img/edumax-logo-original.png" alt="EduMax Campus Virtual" class="logo-img">
+    <h2 class="headline">Sumate a la nueva<br>forma de <em>Enseñar</em></h2>
+    <p class="subline">Creá tu cuenta en menos de un minuto y empezá hoy a digitalizar tus clases con todo lo que necesitás.</p>
+    <div class="feats">
+      <div class="feat"><div class="fi fi1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div><strong>Registro en 30 segundos</strong><span>Sin tarjeta, acceso completo gratuito.</span></div></div>
+      <div class="feat"><div class="fi fi2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div><strong>Datos 100% seguros</strong><span>Cifrado para vos y tus alumnos.</span></div></div>
+      <div class="feat"><div class="fi fi3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><strong>Comunidad activa</strong><span>Compartí recursos con docentes del país.</span></div></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="card">
+      <div class="card-brand">
+        <div class="card-brand-name"><span class="edu">Edu</span><span class="max">Max</span></div>
+        <div class="card-brand-tag">Campus Virtual</div>
+      </div>
+      <div class="card-title">Crear cuenta gratuita 🚀</div>
+      <div class="card-sub">Te lleva menos de un minuto</div>
+
+      <% if(error){ %><div class="err">⚠️ <%= error %></div><% } %>
+
+      <form method="POST" action="/registro" id="form-reg" autocomplete="on" novalidate>
+        <div class="frow">
+          <div class="fg"><label class="lbl">Nombre <span class="req">*</span></label><input type="text" name="nombre" id="f-nombre" required autocomplete="given-name" value="<%= datos.nombre||'' %>" class="inp"></div>
+          <div class="fg"><label class="lbl">Apellido <span class="req">*</span></label><input type="text" name="apellido" id="f-apellido" required autocomplete="family-name" value="<%= datos.apellido||'' %>" class="inp"></div>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Email <span class="req">*</span></label>
+          <input type="email" name="email" id="f-email" required autocomplete="email" value="<%= datos.email||'' %>" placeholder="tu@email.com" class="inp">
+          <div class="field-msg" id="msg-email"></div>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Contraseña <span class="req">*</span></label>
+          <div class="pwd-wrap">
+            <input type="password" name="password" id="f-pass" required autocomplete="new-password" minlength="8" placeholder="Mínimo 8 caracteres" class="inp">
+            <button type="button" class="pwd-toggle" id="toggle1" tabindex="-1">VER</button>
+          </div>
+          <div class="pwd-meter"><div class="pwd-bar" id="bar1"></div><div class="pwd-bar" id="bar2"></div><div class="pwd-bar" id="bar3"></div></div>
+          <div class="pwd-hint" id="pwd-hint">Usá 8+ caracteres con números y mayúsculas</div>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Repetir contraseña <span class="req">*</span></label>
+          <div class="pwd-wrap">
+            <input type="password" name="password2" id="f-pass2" required autocomplete="new-password" placeholder="Escribí la contraseña otra vez" class="inp">
+            <button type="button" class="pwd-toggle" id="toggle2" tabindex="-1">VER</button>
+          </div>
+          <div class="field-msg" id="msg-pass2"></div>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Tipo de cuenta <span class="req">*</span></label>
+          <select name="rol" required class="inp">
+            <option value="alumno" <%= datos.rol==='alumno'?'selected':'' %>>Soy alumno/a</option>
+            <option value="docente" <%= datos.rol==='docente'?'selected':'' %>>Soy docente</option>
+          </select>
+        </div>
+
+        <div class="frow">
+          <div class="fg"><label class="lbl">Institución</label><input type="text" name="institucion" autocomplete="organization" value="<%= datos.institucion||'' %>" placeholder="ISTH Perico" class="inp"></div>
+          <div class="fg"><label class="lbl">Materia</label><input type="text" name="materia" value="<%= datos.materia||'' %>" placeholder="Electrónica" class="inp"></div>
+        </div>
+
+        <button type="submit" class="btn" id="btn-submit">Crear cuenta gratis →</button>
+      </form>
+
+      <p class="auth-sec">¿Ya tenés cuenta? <a href="/login">Ingresar al campus</a></p>
+    </div>
+  </div>
+  <footer>© 2026 EduMax · Plataforma educativa global · en Argentina</footer>
+</div>
+
+<script>
+const email = document.getElementById('f-email');
+const pass  = document.getElementById('f-pass');
+const pass2 = document.getElementById('f-pass2');
+const msgEmail = document.getElementById('msg-email');
+const msgPass2 = document.getElementById('msg-pass2');
+const pwdHint  = document.getElementById('pwd-hint');
+const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3')];
+
+// Mostrar/ocultar contraseñas
+function setupToggle(btnId, inputEl) {
+  document.getElementById(btnId).addEventListener('click', () => {
+    const isPwd = inputEl.type === 'password';
+    inputEl.type = isPwd ? 'text' : 'password';
+    document.getElementById(btnId).textContent = isPwd ? 'OCULTAR' : 'VER';
+  });
+}
+setupToggle('toggle1', pass);
+setupToggle('toggle2', pass2);
+
+// Validar email en vivo (al salir del campo)
+email.addEventListener('blur', () => {
+  const v = email.value.trim();
+  if (!v) { email.classList.remove('valid','invalid'); msgEmail.textContent=''; return; }
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  email.classList.toggle('valid', ok);
+  email.classList.toggle('invalid', !ok);
+  msgEmail.className = 'field-msg ' + (ok ? 'ok' : 'error');
+  msgEmail.textContent = ok ? '✓ Email válido' : '✗ Revisá el formato del email';
+});
+
+// Medidor de fortaleza de contraseña
+function strength(p) {
+  let s = 0;
+  if (p.length >= 8) s++;
+  if (/[A-Z]/.test(p) && /[a-z]/.test(p)) s++;
+  if (/[0-9]/.test(p) || /[^A-Za-z0-9]/.test(p)) s++;
+  return s;
+}
+pass.addEventListener('input', () => {
+  const s = strength(pass.value);
+  bars.forEach((b,i) => {
+    b.className = 'pwd-bar';
+    if (i < s) {
+      if (s === 1) b.classList.add('active-weak');
+      else if (s === 2) b.classList.add('active-medium');
+      else b.classList.add('active-strong');
+    }
+  });
+  if (!pass.value) { pwdHint.className='pwd-hint'; pwdHint.textContent='Usá 8+ caracteres con números y mayúsculas'; }
+  else if (s <= 1) { pwdHint.className='pwd-hint weak'; pwdHint.textContent='Contraseña débil — agregá mayúsculas y números'; }
+  else if (s === 2) { pwdHint.className='pwd-hint medium'; pwdHint.textContent='Contraseña media — casi lista'; }
+  else { pwdHint.className='pwd-hint strong'; pwdHint.textContent='✓ Contraseña fuerte'; }
+  checkMatch();
+});
+
+// Verificar que coincidan
+function checkMatch() {
+  if (!pass2.value) { pass2.classList.remove('valid','invalid'); msgPass2.textContent=''; return; }
+  const match = pass.value === pass2.value;
+  pass2.classList.toggle('valid', match);
+  pass2.classList.toggle('invalid', !match);
+  msgPass2.className = 'field-msg ' + (match ? 'ok' : 'error');
+  msgPass2.textContent = match ? '✓ Las contraseñas coinciden' : '✗ Las contraseñas no coinciden';
+}
+pass2.addEventListener('input', checkMatch);
+
+// Validación final al enviar
+document.getElementById('form-reg').addEventListener('submit', (e) => {
+  const errores = [];
+  if (pass.value.length < 8) errores.push('La contraseña debe tener al menos 8 caracteres');
+  if (pass.value !== pass2.value) errores.push('Las contraseñas no coinciden');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) errores.push('El email no es válido');
+  if (errores.length) {
+    e.preventDefault();
+    alert('⚠️ Revisá:\n\n• ' + errores.join('\n• '));
+  }
+});
+</script>
+</body></html>

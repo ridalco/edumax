@@ -1,0 +1,21 @@
+<% const titulo='Nueva aula' %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Crear nueva aula</h1><p>Configurá tu espacio virtual</p></div></div>
+<div class="card" style="max-width:600px">
+<% if(error){ %><div class="alert alert-error"><%= error %></div><% } %>
+<form method="POST" action="/docente/aulas/nueva" enctype="multipart/form-data">
+  <div class="form-group"><label class="form-label">Nombre del aula *</label><input type="text" name="nombre" required placeholder="ej: Electrónica Analógica 3er año"></div>
+  <div class="form-group"><label class="form-label">Descripción</label><textarea name="descripcion" rows="4" placeholder="¿De qué trata esta materia?"></textarea></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Nivel</label><select name="nivel"><option>Secundario</option><option>Terciario</option><option>Universitario</option></select></div>
+    <div class="form-group"><label class="form-label">Año / División</label><input type="text" name="anio" placeholder="ej: 3er año A"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Imagen del aula (opcional)</label><input type="file" name="imagen" accept="image/*"></div>
+  <div class="modal-actions" style="justify-content:flex-start;margin-top:1.5rem">
+    <a href="/docente" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary">Crear aula →</button>
+  </div>
+</form>
+</div>
+</div><%- include('../partials/footer') %>

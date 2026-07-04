@@ -1,0 +1,19 @@
+<% const titulo=hilo.titulo %><%- include('partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1><%= hilo.titulo %></h1><p>Por <%= hilo.autor %> · <%= new Date(hilo.creado_en).toLocaleDateString('es-AR') %></p></div></div>
+<div class="card" style="margin-bottom:1rem"><p style="font-size:14px;line-height:1.7"><%= hilo.cuerpo %></p></div>
+<% respuestas.forEach(r=>{ %>
+  <div class="respuesta">
+    <div style="font-size:12px;color:#6b7280;margin-bottom:6px"><strong><%= r.autor %></strong> · <%= new Date(r.creado_en).toLocaleDateString('es-AR') %></div>
+    <p style="font-size:14px;line-height:1.7"><%= r.cuerpo %></p>
+  </div>
+<% }) %>
+<div class="card" style="margin-top:1.5rem">
+  <div class="card-title">Responder</div>
+  <form method="POST" action="/foros/hilos/<%= hilo.id %>/responder">
+    <div class="form-group"><textarea name="cuerpo" rows="5" placeholder="Tu respuesta..." required></textarea></div>
+    <button type="submit" class="btn btn-primary">Enviar respuesta</button>
+  </form>
+</div>
+</div><%- include('partials/footer') %>

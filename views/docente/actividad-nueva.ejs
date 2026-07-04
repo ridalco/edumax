@@ -1,0 +1,24 @@
+<% const titulo='Nueva actividad' %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Nueva actividad</h1><p>Definí la consigna y la fecha de entrega para los alumnos</p></div></div>
+<div class="card" style="max-width:600px">
+<form method="POST" action="/docente/aulas/<%= aula.id %>/actividades">
+  <div class="form-group"><label class="form-label">Título *</label><input type="text" name="titulo" required placeholder="ej: Trabajo Práctico 1 - Circuitos"></div>
+  <div class="form-group"><label class="form-label">Consigna / Descripción</label><textarea name="descripcion" rows="4" placeholder="Detallá qué tienen que hacer los alumnos..."></textarea></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Fecha de entrega</label><input type="datetime-local" name="fecha_entrega"></div>
+    <div class="form-group"><label class="form-label">Puntaje máximo</label><input type="number" name="puntaje_max" value="10" min="1" max="100"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Tipo de entrega</label>
+    <select name="tipo_entrega">
+      <option value="archivo">Archivo (subir documento)</option>
+      <option value="texto">Texto en línea</option>
+    </select>
+  </div>
+  <div class="modal-actions" style="justify-content:flex-start">
+    <a href="/docente/aulas/<%= aula.id %>?tab=actividades" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary">Crear actividad</button>
+  </div>
+</form>
+</div></div><%- include('../partials/footer') %>

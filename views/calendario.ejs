@@ -1,0 +1,46 @@
+<% const titulo='Calendario' %><%- include('partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>📅 Calendario</h1><p>Tus eventos y los vencimientos de entregas y evaluaciones, todo junto</p></div><button class="btn btn-primary" onclick="document.getElementById('modal-evento').showModal()">+ Nuevo evento</button></div>
+<% if(!eventos.length){ %><div class="card"><div class="empty-state"><span class="icon">📅</span><h3>Sin eventos próximos</h3><p>Acá vas a ver automáticamente las fechas de entrega y evaluaciones. También podés crear tus propios eventos.</p></div></div>
+<% } else {
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  eventos.forEach(e=>{
+    const fe = new Date(e.fecha_inicio);
+    const dia = new Date(fe); dia.setHours(0,0,0,0);
+    const diff = Math.round((dia - hoy)/86400000);
+    const etiqueta = diff < 0 ? 'Pasado' : diff === 0 ? '¡Hoy!' : diff === 1 ? 'Mañana' : 'En ' + diff + ' días';
+    const dim = diff < 0 ? 'opacity:.5;' : '';
+    const tag = e.link ? 'a' : 'div';
+%>
+  <<%= tag %> <% if(e.link){ %>href="<%= e.link %>"<% } %> class="event-item event-<%= e.tipo %>" style="<%= dim %><% if(e.link){ %>display:block;text-decoration:none;color:inherit<% } %>">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-weight:600;font-size:14px"><%= e.titulo %><% if(e.auto){ %> <span style="font-size:11px;color:#6366F1;font-weight:500">🔗 ver</span><% } %></div>
+        <% if(e.descripcion){ %><div style="font-size:13px;color:#374151;margin-top:2px"><%= e.descripcion %></div><% } %>
+        <% if(e.aula_nombre){ %><div style="font-size:12px;color:#9ca3af;margin-top:2px">📚 <%= e.aula_nombre %></div><% } %>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-weight:600;font-size:13px"><%= fe.toLocaleString('es-AR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) %></div>
+        <span class="badge <%= diff<0?'badge-gray':diff===0?'badge-red':'badge-blue' %>" style="margin-top:4px"><%= etiqueta %></span>
+      </div>
+    </div>
+  </<%= tag %>>
+<% }) } %>
+<dialog id="modal-evento">
+  <h2>Nuevo evento</h2>
+  <form method="POST" action="/calendario/nuevo">
+    <div class="form-group"><label class="form-label">Título *</label><input type="text" name="titulo" required></div>
+    <div class="form-group"><label class="form-label">Descripción</label><textarea name="descripcion" rows="3"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fecha inicio *</label><input type="datetime-local" name="fecha_inicio" required></div>
+      <div class="form-group"><label class="form-label">Fecha fin</label><input type="datetime-local" name="fecha_fin"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tipo</label><select name="tipo"><option value="evento">Evento</option><option value="evaluacion">Evaluación</option><option value="entrega">Entrega</option><option value="clase">Clase</option></select></div>
+      <div class="form-group"><label class="form-label">Aula (opcional)</label><select name="aula_id"><option value="">General</option><% aulas.forEach(a=>{ %><option value="<%= a.id %>"><%= a.nombre %></option><% }) %></select></div>
+    </div>
+    <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
+  </form>
+</dialog>
+</div><%- include('partials/footer') %>

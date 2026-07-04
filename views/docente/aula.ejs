@@ -1,0 +1,954 @@
+<% const titulo=aula.nombre %><%- include('../partials/header') %>
+<%# Breadcrumb %>
+<div class="aula-breadcrumb">
+  <a href="/docente">Mis aulas</a><span class="sep">›</span><span class="current"><%= aula.nombre %></span>
+</div>
+
+<div class="aula-layout">
+  <%- include('../partials/aula-sidebar') %>
+
+  <div class="aula-content-area">
+    <%# Hero del aula %>
+    <div class="aula-hero">
+      <div>
+        <h1>📚 <%= aula.nombre %></h1>
+        <p><%= aula.nivel||'' %> <%= aula.anio||'' %> · <%= alumnos.length %> alumnos · Código: <strong style="color:#4F46E5"><%= aula.codigo_acceso %></strong></p>
+      </div>
+      <div class="aula-hero-actions">
+        <button class="btn btn-sm btn-primary" onclick="document.getElementById('modal-contenido').showModal()">+ Agregar contenido</button>
+      </div>
+    </div>
+
+    <%# ── Calculamos unidades reales de los contenidos ── %>
+    <%
+      // Detectar unidades únicas que tienen contenidos asignados
+      const unidadesUsadas = [...new Set(
+        contenidos.filter(c=>c.unidad).map(c=>c.unidad)
+      )].sort((a,b)=>{
+        const na = parseInt(a.replace(/\D/g,''))||99;
+        const nb = parseInt(b.replace(/\D/g,''))||99;
+        return na-nb;
+      });
+      const sinUnidad = contenidos.filter(c=>!c.unidad);
+      // Calcular máx unidades para el navegador (mínimo 6)
+      const maxUnidad = Math.max(6, unidadesUsadas.length + 1);
+    %>
+
+    <%# Navegador de unidades %>
+    <div class="unidades-nav">
+      <div class="unidades-nav-title">📍 Unidades</div>
+      <div class="unidades-row" style="flex-wrap:wrap;gap:6px">
+        <% for(let i=1;i<=maxUnidad;i++){
+           const uKey = 'Unidad '+i;
+           const hasContent = contenidos.some(c=>c.unidad===uKey);
+           const isActive = unidadesUsadas[0]==='Unidad '+i;
+        %>
+          <a href="#bloque-unidad-<%= i %>"
+             class="unidad-circle <%= hasContent?'completa':'' %>"
+             title="Unidad <%= i %> · <%= contenidos.filter(c=>c.unidad==='Unidad '+i).length %> contenidos"
+             onclick="event.preventDefault();document.getElementById('bloque-unidad-<%= i %>')?.scrollIntoView({behavior:'smooth'})">
+            <%= i %>
+          </a>
+        <% } %>
+        <% if(maxUnidad<12){ %>
+        <button type="button" class="unidad-circle" style="border-style:dashed;opacity:.5"
+          onclick="agregarUnidad(<%= maxUnidad+1 %>)" title="Agregar unidad <%= maxUnidad+1 %>">+</button>
+        <% } %>
+        <div style="margin-left:auto;background:linear-gradient(135deg,#6366F1,#A855F7);color:white;padding:6px 14px;border-radius:10px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;white-space:nowrap">
+          <span style="font-size:18px"><%= contenidos.length %></span>
+          <span style="opacity:.85;font-size:11px;text-transform:uppercase;letter-spacing:1px">contenidos</span>
+        </div>
+      </div>
+    </div>
+
+    <%# CONTENIDO SEGÚN TAB %>
+    <% if(tab==='programa'){ %>
+    <%# ===== PROGRAMA - estilo UCSE: barra de acciones + unidades + progreso ===== %>
+    <% const totalAlumnos = (alumnos && alumnos.length) || 0; %>
+
+    <%# Barra de acciones del docente %>
+    <div class="programa-toolbar">
+      <a href="/docente/aulas/<%= aula.id %>/calificaciones" class="btn-toolbar btn-toolbar-red">📊 Seguimiento por usuarios</a>
+      <button class="btn-toolbar" onclick="document.getElementById('modal-contenido').showModal()">✏️ Agregar contenido</button>
+      <div class="toolbar-filter">
+        <span>Contenidos:</span>
+        <select id="filtro-tipo" onchange="filtrarProgramaTipo(this.value)">
+          <option value="todos">Todos</option>
+          <option value="texto">Texto</option>
+          <option value="archivo">Archivo</option>
+          <option value="video">Video</option>
+          <option value="link">Link</option>
+        </select>
+      </div>
+      <div class="toolbar-filter">
+        <span>Obligatoriedad:</span>
+        <select id="filtro-oblig" onchange="filtrarProgramaOblig(this.value)">
+          <option value="todos">Todos</option>
+          <option value="1">Obligatorios</option>
+          <option value="0">Opcionales</option>
+        </select>
+      </div>
+    </div>
+
+    <% if(!contenidos.length){ %>
+      <div class="card"><div class="empty-state"><span class="icon">📋</span><h3>Programa vacío</h3><p>Agregá contenidos para que aparezcan organizados por unidades, con seguimiento de progreso de tus alumnos.</p><button class="btn btn-primary" onclick="document.getElementById('modal-contenido').showModal()">+ Agregar primer contenido</button></div></div>
+    <% } else {
+      // Agrupar por unidad real
+      const grupos = {};
+      contenidos.forEach(c => {
+        const key = c.unidad || 'General';
+        if(!grupos[key]) grupos[key] = [];
+        grupos[key].push(c);
+      });
+      const orden = Object.keys(grupos).sort((a,b)=>{
+        if(a==='General') return -1;
+        if(b==='General') return 1;
+        return (parseInt(a.replace(/\D/g,''))||99)-(parseInt(b.replace(/\D/g,''))||99);
+      });
+      orden.forEach(uni => {
+        const items = grupos[uni];
+    %>
+      <div class="programa-unidad" data-unidad="<%= uni %>">
+        <div class="programa-unidad-header">
+          <span class="programa-unidad-bar"></span>
+          <span class="programa-unidad-titulo"><%= uni.toUpperCase() %></span>
+          <span class="programa-unidad-count"><%= items.length %> de <%= items.length %></span>
+        </div>
+        <div class="programa-lista">
+        <% items.forEach(c => {
+          // Simular progreso: cuántos alumnos lo vieron (placeholder con dato real cuando exista tracking)
+          const vistos = c._vistos || 0;
+          const esArchivo = !!c.archivo;
+          const tipoColor = {texto:'#3B82F6',archivo:'#16A34A',video:'#EF4444',link:'#8B5CF6',embed:'#F59E0B',imagen:'#EC4899'}[c.tipo] || '#6366F1';
+        %>
+          <div class="programa-fila" data-tipo="<%= c.tipo %>" data-oblig="<%= c.obligatorio?1:0 %>">
+            <span class="programa-fila-estado" style="border-color:<%= tipoColor %>"><% if(c.obligatorio){ %><span style="color:#EF4444;font-size:9px">●</span><% } %></span>
+            <a href="/contenidos/<%= c.id %>/ver" class="programa-fila-titulo">
+              <% if(c.obligatorio){ %>🔒 <% } %><%= c.titulo %>
+              <% if(c.fecha_limite){ %><span class="programa-fila-fecha">Abierta hasta <%= c.fecha_limite %></span><% } %>
+            </a>
+            <div class="programa-fila-progreso">
+              <% if(c.obligatorio){ %><span class="programa-flag">7 🚩</span><% } %>
+              <div class="progreso-barra">
+                <div class="progreso-relleno" style="width:<%= totalAlumnos? Math.round(vistos/totalAlumnos*100):0 %>%"></div>
+                <span class="progreso-texto"><%= vistos %> de <%= totalAlumnos %></span>
+              </div>
+            </div>
+            <div class="programa-fila-acciones">
+              <button onclick="abrirEditar(<%= c.id %>, '<%= encodeURIComponent(JSON.stringify({titulo:c.titulo,descripcion:c.descripcion||'',unidad:c.unidad||'',orden:c.orden||0,obligatorio:c.obligatorio})) %>')" title="Editar">✏️</button>
+              <form method="POST" action="/docente/contenidos/<%= c.id %>/eliminar" style="display:inline" onsubmit="return confirm('¿Eliminar?')"><button type="submit" title="Eliminar">✕</button></form>
+            </div>
+          </div>
+        <% }) %>
+        </div>
+      </div>
+    <% }) } %>
+
+    <script>
+    function filtrarProgramaTipo(t){
+      document.querySelectorAll('.programa-fila').forEach(f=>{
+        f.style.display = (t==='todos'||f.dataset.tipo===t)?'':'none';
+      });
+    }
+    function filtrarProgramaOblig(o){
+      document.querySelectorAll('.programa-fila').forEach(f=>{
+        f.style.display = (o==='todos'||f.dataset.oblig===o)?'':'none';
+      });
+    }
+    </script>
+
+    <% } else if(tab==='actividades'){ %>
+    <%# ===== ACTIVIDADES ===== %>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem"><a href="/docente/aulas/<%= aula.id %>/actividades/nueva" class="btn btn-primary">+ Nueva actividad</a></div>
+    <% if(!actividades.length){ %><div class="card"><div class="empty-state"><span class="icon">📝</span><h3>Sin actividades</h3></div></div>
+    <% } else { actividades.forEach(a => { %>
+      <a href="/docente/actividades/<%= a.id %>" class="contenido-item-link"><div class="contenido-item">
+        <div class="contenido-icon" style="background:#FEF3C7">📝</div>
+        <div style="flex:1"><div style="font-weight:600;font-size:14px"><%= a.titulo %></div><div style="font-size:12px;color:#64748B"><%= a.entregas||0 %> entregas · Máx <%= a.puntaje_max %>pts</div></div>
+        <span class="btn btn-sm btn-primary" style="pointer-events:none">Ver entregas →</span>
+      </div></a>
+    <% }) } %>
+
+    <% } else if(tab==='evaluaciones'){ %>
+    <%# ===== EVALUACIONES ===== %>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem"><a href="/docente/aulas/<%= aula.id %>/evaluaciones/nueva" class="btn btn-primary">+ Nueva evaluación</a></div>
+    <% if(!evaluaciones.length){ %><div class="card"><div class="empty-state"><span class="icon">🎯</span><h3>Sin evaluaciones</h3><p>Podés generar una con IA desde el Asistente</p></div></div>
+    <% } else { evaluaciones.forEach(e => { %>
+      <a href="/docente/evaluaciones/<%= e.id %>/resultados" class="contenido-item-link"><div class="contenido-item">
+        <div class="contenido-icon" style="background:#D1FAE5">🎯</div>
+        <div style="flex:1"><div style="font-weight:600;font-size:14px"><%= e.titulo %></div><div style="font-size:12px;color:#64748B"><%= e.rindieron||0 %> rindieron</div></div>
+        <a href="/docente/evaluaciones/<%= e.id %>/preguntas" class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">Preguntas</a>
+      </div></a>
+    <% }) } %>
+
+    <% } else if(tab==='anuncios'){ %>
+    <%# ===== ANUNCIOS ===== %>
+    <div class="card">
+      <div class="card-title">📢 Publicar anuncio</div>
+      <form method="POST" action="/docente/aulas/<%= aula.id %>/anuncios">
+        <div class="form-group"><label class="form-label">Título</label><input type="text" name="titulo" required></div>
+        <div class="form-group"><label class="form-label">Contenido</label><textarea name="cuerpo" rows="3" required></textarea></div>
+        <button type="submit" class="btn btn-primary">Publicar</button>
+      </form>
+    </div>
+    <% anuncios.forEach(a => { %>
+      <div class="card" style="margin-top:1rem">
+        <div style="font-weight:700;font-size:15px;color:#0F172A;margin-bottom:4px"><%= a.titulo %></div>
+        <div style="font-size:11px;color:#64748B;margin-bottom:8px">Por <%= a.autor %> · <%= new Date(a.creado_en).toLocaleDateString('es-AR') %></div>
+        <div style="font-size:14px;color:#334155"><%= a.cuerpo %></div>
+      </div>
+    <% }) %>
+
+    <% } else if(tab==='foros'){ %>
+    <%# ===== FOROS ===== %>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem"><button class="btn btn-primary" onclick="document.getElementById('modal-foro').showModal()">+ Nuevo foro</button></div>
+    <% if(!foros.length){ %><div class="card"><div class="empty-state"><span class="icon">💬</span><h3>Sin foros</h3></div></div>
+    <% } else { foros.forEach(f => { %>
+      <a href="/foros/<%= f.id %>" class="contenido-item-link"><div class="contenido-item">
+        <div class="contenido-icon" style="background:#EDE9FE">💬</div>
+        <div style="flex:1"><div style="font-weight:600;font-size:14px"><%= f.titulo %></div><div style="font-size:12px;color:#64748B"><%= f.hilos||0 %> temas</div></div>
+      </div></a>
+    <% }) } %>
+
+    <% } else if(tab==='wikis'){ %>
+    <%# ===== WIKIS ===== %>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem"><button class="btn btn-primary" onclick="document.getElementById('modal-wiki').showModal()">+ Nueva wiki</button></div>
+    <% if(!wikis||!wikis.length){ %><div class="card"><div class="empty-state"><span class="icon">📖</span><h3>Sin wikis</h3><p>Las wikis son páginas colaborativas que los alumnos pueden editar</p></div></div>
+    <% } else { wikis.forEach(w => { %>
+      <a href="/wikis/<%= w.id %>" class="contenido-item-link"><div class="contenido-item">
+        <div class="contenido-icon" style="background:#DBEAFE">📖</div>
+        <div style="flex:1"><div style="font-weight:600;font-size:14px"><%= w.titulo %></div><div style="font-size:12px;color:#64748B">Actualizado: <%= new Date(w.editado_en).toLocaleDateString('es-AR') %></div></div>
+      </div></a>
+    <% }) } %>
+
+    <% } else if(tab==='encuestas'){ %>
+    <%# ===== ENCUESTAS ===== %>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1rem"><button class="btn btn-primary" onclick="document.getElementById('modal-encuesta').showModal()">+ Nueva encuesta</button></div>
+    <% if(!encuestas||!encuestas.length){ %><div class="card"><div class="empty-state"><span class="icon">📊</span><h3>Sin encuestas</h3></div></div>
+    <% } else { encuestas.forEach(e => { const total=e.votos.reduce((s,v)=>s+v.c,0); %>
+      <div class="encuesta-card">
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">📊 <%= e.pregunta %></div>
+        <div style="font-size:12px;color:#64748B;margin-bottom:12px"><%= total %> respuestas</div>
+        <% e.opciones.forEach(op=>{ const v=e.votos.find(x=>x.opcion===op); const c=v?v.c:0; const pct=total?Math.round(c/total*100):0; %>
+          <div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span><%= op %></span><span style="font-weight:600"><%= c %> (<%= pct %>%)</span></div><div class="encuesta-bar"><div class="encuesta-bar-fill" style="width:<%= pct %>%"></div></div></div>
+        <% }) %>
+      </div>
+    <% }) } %>
+
+    <% } else if(tab==='videollamada'){ %>
+    <%# ===== VIDEOLLAMADA ===== %>
+    <% if(aula.videollamada_url){ %>
+    <div class="video-banner">
+      <div class="video-icon">🎥</div>
+      <div class="video-info"><div class="video-title">Clase virtual en vivo</div><div class="video-meta"><%= aula.videollamada_horario||'Horario no configurado' %></div></div>
+      <a href="<%= aula.videollamada_url %>" target="_blank" class="video-btn">▶ Unirse</a>
+    </div>
+    <% } %>
+    <div class="card">
+      <div class="card-title">🎥 Configurar clase en vivo</div>
+      <p style="color:#64748B;font-size:13px;margin-bottom:1rem">Pegá un link de Zoom, Google Meet o Jitsi.</p>
+      <form method="POST" action="/docente/aulas/<%= aula.id %>/videollamada">
+        <div class="form-group"><label class="form-label">URL</label><input type="url" name="url" value="<%= aula.videollamada_url||'' %>" placeholder="https://meet.google.com/xxx-xxxx-xxx"></div>
+        <div class="form-group"><label class="form-label">Horario</label><input type="text" name="horario" value="<%= aula.videollamada_horario||'' %>" placeholder="Lunes y miércoles 19:00"></div>
+        <button type="submit" class="btn btn-primary">💾 Guardar</button>
+      </form>
+    </div>
+
+    <% } else if(tab==='alumnos'){ %>
+    <%# ===== ALUMNOS ===== %>
+    <% if(resetInfo){ %>
+    <div class="alert alert-success" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span>🔑 Contraseña temporal para <strong><%= resetInfo.nombre %></strong>:</span>
+      <code style="background:#fff;border:1px solid #BBF7D0;padding:4px 12px;border-radius:6px;font-weight:700;letter-spacing:1px"><%= resetInfo.temp %></code>
+      <span style="font-size:13px">Pasásela al alumno y que la cambie al entrar.</span>
+    </div>
+    <% } %>
+    <div class="add-alumno-card">
+      <h3>➕ Agregar alumno manualmente</h3>
+      <p style="font-size:13px;color:#475569;margin-bottom:1rem">Inscribilo vos sin necesidad de código. Si no tiene cuenta se crea automáticamente.</p>
+      <form method="POST" action="/docente/aulas/<%= aula.id %>/inscribir-alumno">
+        <div class="form-row-3">
+          <div class="form-group"><label class="form-label">Nombre *</label><input type="text" name="nombre" required></div>
+          <div class="form-group"><label class="form-label">Apellido *</label><input type="text" name="apellido" required></div>
+          <div class="form-group"><label class="form-label">Email *</label><input type="email" name="email" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Contraseña (opcional)</label><input type="text" name="password" placeholder="Se autogenera si lo dejás vacío"></div>
+          <div style="display:flex;align-items:flex-end"><button type="submit" class="btn btn-primary">➕ Inscribir alumno</button></div>
+        </div>
+      </form>
+    </div>
+    <div style="background:#FEF3C7;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:#92400E"><strong>💡 También:</strong> Compartí el código <strong style="background:white;padding:2px 8px;border-radius:4px"><%= aula.codigo_acceso %></strong> y los alumnos se inscriben solos.</div>
+    <% if(!alumnos.length){ %>
+      <div class="card"><div class="empty-state"><span class="icon">👥</span><h3>Sin alumnos inscriptos</h3></div></div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table><thead><tr><th>Alumno</th><th>Email</th><th>Inscripto</th><th>Progreso</th><th>Clave</th></tr></thead><tbody>
+        <% alumnos.forEach(a => { %>
+          <tr><td><strong><%= a.apellido %>, <%= a.nombre %></strong></td><td style="font-size:12px"><%= a.email %></td><td style="font-size:12px"><%= new Date(a.fecha).toLocaleDateString('es-AR') %></td><td><span class="badge badge-blue"><%= a.progreso||0 %>%</span></td><td><form method="POST" action="/docente/aulas/<%= aula.id %>/alumnos/<%= a.id %>/reset-password" onsubmit="return confirm('¿Generar una contraseña temporal para <%= a.nombre %>?')"><button type="submit" class="btn btn-sm btn-secondary">🔑 Reset</button></form></td></tr>
+        <% }) %>
+        </tbody></table>
+      </div>
+    <% } %>
+
+    <div class="card" style="border:1px solid #FECACA;background:#FEF2F2;margin-top:1.5rem">
+      <div style="font-weight:700;color:#B91C1C;margin-bottom:6px">⚠️ Zona de peligro</div>
+      <p style="font-size:13px;color:#7F1D1D;margin-bottom:10px">Eliminar el aula borra para siempre sus contenidos, actividades, entregas, evaluaciones, foros e inscripciones. No se puede deshacer.</p>
+      <form method="POST" action="/docente/aulas/<%= aula.id %>/eliminar" onsubmit="return confirm('¿Seguro que querés ELIMINAR el aula &quot;<%= aula.nombre %>&quot; y TODO su contenido? Esta acción no se puede deshacer.')">
+        <button type="submit" class="btn btn-sm btn-danger">🗑️ Eliminar esta aula</button>
+      </form>
+    </div>
+
+    <% } else { %>
+    <%# ===== INICIO - vista blog agrupada por UNIDAD ===== %>
+    <% if(!contenidos.length){ %>
+      <div class="card"><div class="empty-state"><span class="icon">📚</span><h3>Sin contenidos todavía</h3><p>Agregá textos, archivos, videos o links para tus alumnos</p><button class="btn btn-primary" onclick="document.getElementById('modal-contenido').showModal()">+ Agregar contenido</button></div></div>
+    <% } else {
+      // Agrupar contenidos por unidad real
+      const grupos = {};
+      contenidos.forEach(c => {
+        const key = c.unidad || '__sin_unidad__';
+        if(!grupos[key]) grupos[key] = [];
+        grupos[key].push(c);
+      });
+      // Orden: Unidad 1, 2, 3... luego sin unidad
+      const grupoKeys = Object.keys(grupos).sort((a,b)=>{
+        if(a==='__sin_unidad__') return 1;
+        if(b==='__sin_unidad__') return -1;
+        return (parseInt(a.replace(/\D/g,''))||99) - (parseInt(b.replace(/\D/g,''))||99);
+      });
+      grupoKeys.forEach(key => {
+        const items = grupos[key];
+        const isUnidad = key !== '__sin_unidad__';
+        const uNum = isUnidad ? parseInt(key.replace(/\D/g,'')) : null;
+    %>
+      <%# Cabecera del grupo de unidad %>
+      <% if(isUnidad){ %>
+      <div class="unidad-bloque-header" id="bloque-unidad-<%= uNum %>">
+        <div class="unidad-bloque-num"><%= uNum %></div>
+        <div class="unidad-bloque-info">
+          <span class="unidad-bloque-label"><%= key %></span>
+          <span class="unidad-bloque-count"><%= items.length %> contenido<%= items.length>1?'s':'' %></span>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary"
+          onclick="document.getElementById('unidad-sel').value='<%= key %>';document.getElementById('modal-contenido').showModal()"
+          title="Agregar a <%= key %>">+ Agregar aquí</button>
+      </div>
+      <% } else { %>
+      <div class="unidad-bloque-header" style="background:#FEF9C3;border-color:#FDE047">
+        <div class="unidad-bloque-num" style="background:#EAB308">📌</div>
+        <div class="unidad-bloque-info">
+          <span class="unidad-bloque-label">Sin unidad asignada</span>
+          <span class="unidad-bloque-count"><%= items.length %> contenido<%= items.length>1?'s':'' %></span>
+        </div>
+      </div>
+      <% } %>
+
+      <%# Contenidos del grupo %>
+      <% items.forEach((c, idx)=>{
+        let fileType = 'other';
+        if (c.nombre_original) {
+          const n = c.nombre_original.toLowerCase();
+          if (n.endsWith('.pdf')) fileType = 'pdf';
+          else if (n.match(/\.(jpg|jpeg|png|gif|webp)$/)) fileType = 'image';
+          else if (n.match(/\.(mp4|webm)$/)) fileType = 'video';
+          else if (n.match(/\.(mp3|wav|m4a)$/)) fileType = 'audio';
+          else if (n.match(/\.(docx?|odt)$/)) fileType = 'word';
+          else if (n.match(/\.(xlsx?|csv|ods)$/)) fileType = 'excel';
+          else if (n.match(/\.(pptx?|odp)$/)) fileType = 'powerpoint';
+        }
+        let ytId = null, vimeoId = null;
+        if (c.url_externa) {
+          const yt = c.url_externa.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]+)/);
+          if (yt) ytId = yt[1];
+          const vm = c.url_externa.match(/vimeo\.com\/(\d+)/);
+          if (vm) vimeoId = vm[1];
+        }
+      %>
+      <div class="blog-post" id="contenido-<%= c.id %>">
+        <div class="blog-post-header">
+          <div class="blog-post-num"><%= idx+1 %></div>
+          <div style="flex:1;min-width:0">
+            <h3 class="blog-post-title"><%= c.titulo %></h3>
+            <div class="blog-post-meta">
+              <span class="badge badge-purple"><%= c.tipo.toUpperCase() %></span>
+              <% if(c.unidad){ %><span class="badge badge-blue">📋 <%= c.unidad %></span><% } %>
+              <% if(c.obligatorio){ %><span class="badge badge-red">📌 Obligatorio</span><% } %>
+              <% if(c.nombre_original){ %><span style="font-size:12px;color:#64748B">· <%= c.nombre_original %></span><% } %>
+            </div>
+          </div>
+          <div class="blog-post-actions">
+            <a href="/contenidos/<%= c.id %>/ver" class="btn btn-sm btn-primary" title="Ver en pantalla completa">⛶ Ver</a>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="abrirEditar(<%= c.id %>, '<%= encodeURIComponent(JSON.stringify({titulo:c.titulo,descripcion:c.descripcion||'',unidad:c.unidad||'',orden:c.orden||0,obligatorio:c.obligatorio})) %>')" title="Editar">✏️</button>
+            <form method="POST" action="/docente/contenidos/<%= c.id %>/subir" style="display:inline"><button type="submit" class="btn btn-sm btn-secondary" title="Subir orden">↑</button></form>
+            <form method="POST" action="/docente/contenidos/<%= c.id %>/bajar" style="display:inline"><button type="submit" class="btn btn-sm btn-secondary" title="Bajar orden">↓</button></form>
+            <% if(c.archivo){ %><a href="/uploads/<%= c.archivo %>" download="<%= c.nombre_original %>" class="btn btn-sm btn-secondary" title="Descargar">⬇️</a><% } %>
+            <form method="POST" action="/docente/contenidos/<%= c.id %>/eliminar" style="display:inline" onsubmit="return confirm('¿Eliminar este contenido?')"><button type="submit" class="btn btn-sm btn-danger" title="Eliminar">✕</button></form>
+          </div>
+        </div>
+
+        <% if(c.descripcion){ %><p class="blog-post-desc"><%= c.descripcion %></p><% } %>
+
+        <div class="blog-post-content">
+          <% if(c.tipo==='texto' && c.cuerpo){ %>
+            <div class="viewer-text-rich blog-preview-text"><%- c.cuerpo %></div>
+          <% } else if(c.tipo==='embed' && c.embed_html){ %>
+            <div class="blog-preview-embed"><%- c.embed_html %></div>
+          <% } else if(c.tipo==='video' && ytId){ %>
+            <div class="blog-preview-aspect"><iframe src="https://www.youtube.com/embed/<%= ytId %>" frameborder="0" allowfullscreen></iframe></div>
+          <% } else if(c.tipo==='video' && vimeoId){ %>
+            <div class="blog-preview-aspect"><iframe src="https://player.vimeo.com/video/<%= vimeoId %>" frameborder="0" allowfullscreen></iframe></div>
+          <% } else if(c.tipo==='video' && c.url_externa){ %>
+            <div class="blog-preview-aspect"><iframe src="<%= c.url_externa %>" frameborder="0" allowfullscreen></iframe></div>
+          <% } else if(c.tipo==='imagen' && c.url_externa){ %>
+            <div class="blog-preview-image"><img src="<%= c.url_externa %>" alt="<%= c.titulo %>"></div>
+          <% } else if(fileType==='pdf'){ %>
+            <div class="pdf-wrapper" style="border-radius:10px;overflow:hidden;border:1px solid #E2E8F0">
+              <iframe
+                src="/pdfjs/viewer.html?file=/uploads/<%= encodeURIComponent(c.archivo) %>"
+                style="width:100%;height:680px;border:0;display:block"
+                allowfullscreen
+                title="<%= c.titulo %>"
+              ></iframe>
+            </div>
+          <% } else if(fileType==='image'){ %>
+            <div class="blog-preview-image"><img src="/uploads/<%= c.archivo %>" alt="<%= c.titulo %>"></div>
+          <% } else if(fileType==='video'){ %>
+            <div class="blog-preview-video"><video controls><source src="/uploads/<%= c.archivo %>"></video></div>
+          <% } else if(fileType==='audio'){ %>
+            <div class="blog-preview-audio"><audio controls style="width:100%"><source src="/uploads/<%= c.archivo %>"></audio></div>
+          <% } else if(fileType==='word'||fileType==='excel'||fileType==='powerpoint'){ %>
+            <div class="blog-preview-office">📋 <strong>Documento Office</strong> · Click en "Pantalla completa" para verlo embebido o usá el botón de descargar.</div>
+          <% } else if(c.tipo==='link' && c.url_externa){ %>
+            <div class="blog-preview-link"><a href="<%= c.url_externa %>" target="_blank">🔗 <%= c.url_externa %></a></div>
+          <% } else { %>
+            <div class="blog-preview-other">📁 Archivo · <a href="/contenidos/<%= c.id %>/ver">Ver detalles</a></div>
+          <% } %>
+        </div>
+      </div>
+    <% }); /* fin forEach items */ }) /* fin grupoKeys.forEach */ } %>
+    <% } %>
+  </div>
+</div>
+
+<%# Modales %>
+<dialog id="modal-contenido" class="dlg-grande">
+  <div class="modal-header">
+    <h2>📚 Agregar contenido</h2>
+    <button type="button" class="modal-close" onclick="this.closest('dialog').close()">✕</button>
+  </div>
+  <form method="POST" action="/docente/aulas/<%= aula.id %>/contenidos" enctype="multipart/form-data" id="form-contenido">
+    <div class="modal-body">
+      <%# Tabs de tipo %>
+      <div class="modal-tabs">
+        <button type="button" class="modal-tab active" data-tipo="texto">📄 Texto / Clase</button>
+        <button type="button" class="modal-tab" data-tipo="archivo">📎 Archivo</button>
+        <button type="button" class="modal-tab" data-tipo="video">🎬 Video</button>
+        <button type="button" class="modal-tab" data-tipo="audio">🎵 Audio</button>
+        <button type="button" class="modal-tab" data-tipo="imagen">🖼️ Imagen</button>
+        <button type="button" class="modal-tab" data-tipo="link">🔗 Link</button>
+        <button type="button" class="modal-tab" data-tipo="presentacion">📊 Presentación</button>
+        <button type="button" class="modal-tab" data-tipo="formulario">📝 Formulario</button>
+        <button type="button" class="modal-tab" data-tipo="interactivo">🎮 Interactivo</button>
+        <button type="button" class="modal-tab" data-tipo="embed">⚡ HTML/Embed</button>
+      </div>
+      <input type="hidden" name="tipo" id="tipo-input" value="texto">
+
+      <div class="form-row">
+        <div class="form-group" style="flex:2"><label class="form-label">Título *</label><input type="text" name="titulo" required placeholder="Ej: Introducción a los transistores"></div>
+        <div class="form-group" style="flex:1"><label class="form-label">Unidad</label>
+          <select name="unidad" id="unidad-sel">
+            <option value="">Sin unidad</option>
+            <% for(let u=1;u<=12;u++){ %><option value="Unidad <%= u %>">Unidad <%= u %></option><% } %>
+          </select>
+        </div>
+      </div>
+
+      <%# ----- TIPO: TEXTO ----- %>
+      <div class="modal-pane" data-pane="texto">
+        <div class="form-group">
+          <label class="form-label">Contenido de la clase</label>
+          <div id="editor-quill" style="height:300px;background:white"></div>
+          <textarea name="cuerpo" id="cuerpo-hidden" style="display:none"></textarea>
+          <p class="form-hint">Editor enriquecido: podés dar formato, agregar listas, links, imágenes, etc.</p>
+        </div>
+      </div>
+
+      <%# ----- TIPO: ARCHIVO ----- %>
+      <div class="modal-pane" data-pane="archivo" style="display:none">
+        <div class="form-group">
+          <label class="form-label">📎 Archivo (máx 200 MB)</label>
+          <input type="file" name="archivo" id="file-input">
+          <p class="form-hint">PDF, Word, Excel, PowerPoint, imágenes, videos. Se va a poder ver en la plataforma sin descargar.</p>
+          <div id="onedrive-warning" style="display:none;margin-top:8px;padding:10px 14px;background:#FFF3CD;border:1px solid #FFC107;border-radius:8px;font-size:13px;color:#856404">
+            ⚠️ <strong>Archivo en OneDrive no descargado.</strong> Hacé clic derecho sobre el archivo → <strong>"Mantener siempre en este dispositivo"</strong> y esperá que se descargue antes de subirlo.
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción (opcional)</label>
+          <textarea name="descripcion" rows="3" placeholder="¿De qué trata este archivo?"></textarea>
+        </div>
+      </div>
+      <script>
+      document.getElementById('file-input')?.addEventListener('change', function() {
+        const warn = document.getElementById('onedrive-warning');
+        if (!this.files[0]) return;
+        const f = this.files[0];
+        // Si el archivo es 0 bytes probablemente no está descargado de OneDrive
+        if (f.size === 0) {
+          warn.style.display = 'block';
+          this.value = '';
+        } else {
+          warn.style.display = 'none';
+        }
+      });
+      </script>
+
+      <%# ----- TIPO: VIDEO ----- %>
+      <div class="modal-pane" data-pane="video" style="display:none">
+        <div class="form-group">
+          <label class="form-label">🎬 URL del video</label>
+          <input type="url" name="url_externa" placeholder="https://www.youtube.com/watch?v=... o https://vimeo.com/...">
+          <p class="form-hint">Pegá el link de YouTube, Vimeo u otra plataforma. Se incrusta automáticamente.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea name="descripcion" rows="3" placeholder="¿Qué van a aprender en este video?"></textarea>
+        </div>
+      </div>
+
+      <%# ----- TIPO: LINK ----- %>
+      <div class="modal-pane" data-pane="link" style="display:none">
+        <div class="form-group">
+          <label class="form-label">🔗 URL del sitio</label>
+          <input type="url" name="url_externa" placeholder="https://...">
+          <p class="form-hint">Sitio externo, página web, documento online, etc.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea name="descripcion" rows="3" placeholder="¿Por qué deberían visitar este enlace?"></textarea>
+        </div>
+      </div>
+
+      <%# ----- TIPO: EMBED HTML ----- %>
+      <div class="modal-pane" data-pane="embed" style="display:none">
+        <div class="form-group">
+          <label class="form-label">⚡ Código HTML para insertar</label>
+          <textarea name="embed_html" rows="6" placeholder='<iframe src="https://www.youtube.com/embed/..." width="100%" height="400"></iframe>&#10;&#10;O cualquier código embed de:&#10;- Genially&#10;- Padlet&#10;- Slideshare&#10;- Wooclap&#10;- Mentimeter&#10;- Forms de Google&#10;- Mapas&#10;- Códigos de SCORM, etc.' style="font-family:monospace;font-size:13px"></textarea>
+          <p class="form-hint">⚡ Pegá el código <code>&lt;iframe&gt;</code> o embed de Genially, Padlet, YouTube, Google Forms, etc. Se va a renderizar directamente en la plataforma.</p>
+        </div>
+        <div class="alert alert-info" style="font-size:13px">
+          <strong>📝 Cómo conseguir el código embed:</strong><br>
+          1. En el sitio (YouTube, Genially, etc.) buscá <strong>"Compartir"</strong> o <strong>"Insertar"</strong><br>
+          2. Copiá el código HTML que dice <code>&lt;iframe...&gt;</code><br>
+          3. Pegalo acá arriba
+        </div>
+      </div>
+
+      <%# ----- TIPO: IMAGEN ----- %>
+      <div class="modal-pane" data-pane="imagen" style="display:none">
+        <div class="form-group">
+          <label class="form-label">🖼️ Subir imagen desde tu PC</label>
+          <input type="file" name="archivo" accept="image/*" id="img-file-input">
+          <p class="form-hint">JPG, PNG, GIF, WebP — se muestra directamente en el aula.</p>
+        </div>
+        <div class="form-group" style="text-align:center;color:#94A3B8;font-size:13px">— o pegá una URL —</div>
+        <div class="form-group">
+          <label class="form-label">🔗 URL de imagen online</label>
+          <input type="url" name="url_externa" placeholder="https://ejemplo.com/imagen.jpg" id="img-url-input">
+          <p class="form-hint">Si cargás una imagen Y una URL, se usa la imagen subida.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pie de imagen / Descripción</label>
+          <textarea name="descripcion" rows="2"></textarea>
+        </div>
+      </div>
+
+      <%# ----- TIPO: AUDIO ----- %>
+      <div class="modal-pane" data-pane="audio" style="display:none">
+        <div class="form-group">
+          <label class="form-label">🎵 Subir audio desde tu PC</label>
+          <input type="file" name="archivo" accept="audio/*">
+          <p class="form-hint">MP3, WAV, M4A, OGG — se reproduce directamente en el aula.</p>
+        </div>
+        <div class="form-group" style="text-align:center;color:#94A3B8;font-size:13px">— o pegá una URL de audio —</div>
+        <div class="form-group">
+          <label class="form-label">🔗 URL de audio online</label>
+          <input type="url" name="url_externa" placeholder="https://soundcloud.com/... o link directo a MP3">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea name="descripcion" rows="2" placeholder="Ej: Podcast sobre circuitos eléctricos..."></textarea>
+        </div>
+        <div class="alert alert-info" style="font-size:13px">
+          💡 <strong>Ideal para:</strong> clases grabadas, podcasts educativos, audiolibros, pronunciación de idiomas.
+        </div>
+      </div>
+
+      <%# ----- TIPO: PRESENTACIÓN ----- %>
+      <div class="modal-pane" data-pane="presentacion" style="display:none">
+        <div class="form-group">
+          <label class="form-label">📊 URL de la presentación</label>
+          <input type="url" name="url_externa" id="pres-url" placeholder="https://docs.google.com/presentation/..." oninput="generarEmbedPresentacion(this.value)">
+          <p class="form-hint">Pegá el link de Google Slides, Canva, PowerPoint Online o SlideShare.</p>
+        </div>
+        <div id="pres-embed-preview" style="display:none;margin-top:8px">
+          <label class="form-label">✅ Vista previa generada automáticamente</label>
+          <textarea name="embed_html" id="pres-embed-code" rows="3" readonly style="font-family:monospace;font-size:12px;background:#F8FAFC"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea name="descripcion" rows="2" placeholder="Ej: Presentación de la Unidad 1..."></textarea>
+        </div>
+        <div class="alert alert-info" style="font-size:13px">
+          <strong>🔧 Cómo compartir Google Slides:</strong><br>
+          Archivo → Compartir → Publicar en la web → Insertar → Copiar el link → Pegar arriba.<br>
+          <strong>Canva:</strong> Compartir → Más → Insertar → copiar el link.
+        </div>
+      </div>
+
+      <%# ----- TIPO: FORMULARIO ----- %>
+      <div class="modal-pane" data-pane="formulario" style="display:none">
+        <div class="form-group">
+          <label class="form-label">📝 URL del formulario</label>
+          <input type="url" name="url_externa" id="form-url" placeholder="https://forms.gle/... o https://docs.google.com/forms/..." oninput="generarEmbedFormulario(this.value)">
+          <p class="form-hint">Google Forms, Microsoft Forms, Typeform, JotForm, etc.</p>
+        </div>
+        <div id="form-embed-preview" style="display:none;margin-top:8px">
+          <label class="form-label">✅ Código embed generado</label>
+          <textarea name="embed_html" id="form-embed-code" rows="3" readonly style="font-family:monospace;font-size:12px;background:#F8FAFC"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea name="descripcion" rows="2" placeholder="Ej: Formulario de autoevaluación de la Unidad 2..."></textarea>
+        </div>
+        <div class="alert alert-info" style="font-size:13px">
+          <strong>📋 Usos:</strong> encuestas de entrada/salida, autoevaluaciones, registros de asistencia, formularios de inscripción, cuestionarios de opinión.<br><br>
+          <strong>Google Forms:</strong> Enviar → Insertar → copiar solo el link (no el iframe completo).
+        </div>
+      </div>
+
+      <%# ----- TIPO: INTERACTIVO ----- %>
+      <div class="modal-pane" data-pane="interactivo" style="display:none">
+        <div class="recursos-grid">
+          <div class="recurso-card" onclick="setInteractivoUrl('https://view.genial.ly/')">
+            <div class="recurso-icon">🎯</div>
+            <div class="recurso-nombre">Genially</div>
+            <div class="recurso-desc">Presentaciones y juegos interactivos</div>
+          </div>
+          <div class="recurso-card" onclick="setInteractivoUrl('https://padlet.com/')">
+            <div class="recurso-icon">📌</div>
+            <div class="recurso-nombre">Padlet</div>
+            <div class="recurso-desc">Tableros colaborativos</div>
+          </div>
+          <div class="recurso-card" onclick="setInteractivoUrl('https://www.kahoot.it/')">
+            <div class="recurso-icon">🏆</div>
+            <div class="recurso-nombre">Kahoot</div>
+            <div class="recurso-desc">Juegos de preguntas en vivo</div>
+          </div>
+          <div class="recurso-card" onclick="setInteractivoUrl('https://www.mentimeter.com/')">
+            <div class="recurso-icon">📊</div>
+            <div class="recurso-nombre">Mentimeter</div>
+            <div class="recurso-desc">Encuestas y nubes de palabras</div>
+          </div>
+          <div class="recurso-card" onclick="setInteractivoUrl('https://wordwall.net/')">
+            <div class="recurso-icon">🎲</div>
+            <div class="recurso-nombre">Wordwall</div>
+            <div class="recurso-desc">Juegos educativos y actividades</div>
+          </div>
+          <div class="recurso-card" onclick="setInteractivoUrl('https://www.educaplay.com/')">
+            <div class="recurso-icon">🕹️</div>
+            <div class="recurso-nombre">Educaplay</div>
+            <div class="recurso-desc">Sopas de letras, crucigramas, etc.</div>
+          </div>
+          <div class="recurso-card" onclick="setInteractivoUrl('https://quizlet.com/')">
+            <div class="recurso-icon">🃏</div>
+            <div class="recurso-nombre">Quizlet</div>
+            <div class="recurso-desc">Tarjetas de estudio y juegos</div>
+          </div>
+          <div class="recurso-card" onclick="setInteractivoUrl('https://www.canva.com/')">
+            <div class="recurso-icon">🎨</div>
+            <div class="recurso-nombre">Canva</div>
+            <div class="recurso-desc">Infografías y diseños</div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:1rem">
+          <label class="form-label">🔗 URL del recurso interactivo</label>
+          <input type="url" name="url_externa" id="interactivo-url" placeholder="Pegá el link o elegí una herramienta arriba">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Código embed (opcional)</label>
+          <textarea name="embed_html" rows="3" placeholder='Si la herramienta tiene opción "Insertar" o "Embed", pegá el código iframe aquí para que se vea directo en el aula.' style="font-size:13px;font-family:monospace"></textarea>
+          <p class="form-hint">Si no tenés el embed, se mostrará como link con botón para abrir.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea name="descripcion" rows="2" placeholder="Ej: Juego Kahoot para repasar la Unidad 3..."></textarea>
+        </div>
+      </div>
+
+      <%# Opciones avanzadas %>
+      <div class="form-divider">Opciones</div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1">
+          <label class="checkbox-label">
+            <input type="checkbox" name="obligatorio" value="1">
+            <span>📌 Contenido obligatorio</span>
+          </label>
+          <p class="form-hint" style="margin-left:28px">Los alumnos deben verlo para avanzar</p>
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label">Orden</label>
+          <input type="number" name="orden" value="0" min="0" style="width:80px">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">✓ Guardar contenido</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="modal-foro">
+  <div class="modal-header"><h2>💬 Nuevo foro</h2><button type="button" class="modal-close" onclick="this.closest('dialog').close()">✕</button></div>
+  <form method="POST" action="/docente/aulas/<%= aula.id %>/foros">
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Título *</label><input type="text" name="titulo" required></div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea name="descripcion" rows="3"></textarea></div>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button><button type="submit" class="btn btn-primary">Crear</button></div>
+  </form>
+</dialog>
+
+<dialog id="modal-wiki">
+  <div class="modal-header"><h2>📖 Nueva wiki</h2><button type="button" class="modal-close" onclick="this.closest('dialog').close()">✕</button></div>
+  <form method="POST" action="/docente/aulas/<%= aula.id %>/wikis">
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Título *</label><input type="text" name="titulo" required></div>
+      <div class="form-group"><label class="form-label">Contenido inicial</label><textarea name="contenido" rows="6"></textarea></div>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button><button type="submit" class="btn btn-primary">Crear</button></div>
+  </form>
+</dialog>
+
+<dialog id="modal-encuesta">
+  <div class="modal-header"><h2>📊 Nueva encuesta</h2><button type="button" class="modal-close" onclick="this.closest('dialog').close()">✕</button></div>
+  <form method="POST" action="/docente/aulas/<%= aula.id %>/encuestas">
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Pregunta *</label><input type="text" name="pregunta" required></div>
+      <div class="form-group"><label class="form-label">Opciones (una por línea)</label><textarea name="opciones" rows="4" required placeholder="Opción A&#10;Opción B&#10;Opción C"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="multiple" value="1"> Selección múltiple</label></div>
+        <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="anonima" value="1" checked> Anónima</label></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button><button type="submit" class="btn btn-primary">Crear</button></div>
+  </form>
+</dialog>
+
+<%# Cargar Quill editor %>
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<script>
+// Tabs del modal - solo el tab activo envía sus campos
+function activarTab(tipo) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.toggle('active', t.dataset.tipo === tipo));
+  document.getElementById('tipo-input').value = tipo;
+  document.querySelectorAll('.modal-pane').forEach(p => {
+    const activo = p.dataset.pane === tipo;
+    p.style.display = activo ? 'block' : 'none';
+    // CRÍTICO: deshabilitar inputs de panes ocultos para que no se envíen
+    p.querySelectorAll('input, textarea, select').forEach(i => i.disabled = !activo);
+  });
+}
+document.querySelectorAll('.modal-tab').forEach(tab => {
+  tab.addEventListener('click', () => activarTab(tab.dataset.tipo));
+});
+// Inicializar: solo el pane activo (texto) tiene inputs habilitados
+activarTab('texto');
+
+// Quill
+let quill;
+function initQuill() {
+  if (!quill && document.getElementById('editor-quill') && typeof Quill !== 'undefined') {
+    quill = new Quill('#editor-quill', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          [{ 'header': [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'color': [] }, { 'background': [] }],
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+          [{ 'align': [] }],
+          ['link', 'image', 'video', 'blockquote', 'code-block'],
+          ['clean']
+        ]
+      },
+      placeholder: 'Escribí el contenido de la clase. Podés usar formato, listas, imágenes...'
+    });
+  }
+}
+window.addEventListener('load', initQuill);
+
+// Antes de enviar el form, copiar HTML del editor al textarea
+document.getElementById('form-contenido')?.addEventListener('submit', (e) => {
+  if (quill && document.getElementById('tipo-input').value === 'texto') {
+    document.getElementById('cuerpo-hidden').value = quill.root.innerHTML;
+    document.getElementById('cuerpo-hidden').disabled = false;
+  }
+});
+
+// ── Agregar unidad nueva ─────────────────────────────────
+function agregarUnidad(num) {
+  const sel = document.getElementById('unidad-sel');
+  if (sel) {
+    sel.value = 'Unidad ' + num;
+    // Si no existe la opción, crearla
+    if (!sel.querySelector('option[value="Unidad ' + num + '"]')) {
+      const opt = document.createElement('option');
+      opt.value = 'Unidad ' + num;
+      opt.textContent = 'Unidad ' + num;
+      sel.appendChild(opt);
+      sel.value = 'Unidad ' + num;
+    }
+  }
+  document.getElementById('modal-contenido').showModal();
+}
+
+// ── Generar embed de presentación automáticamente ─────────
+function generarEmbedPresentacion(url) {
+  const preview = document.getElementById('pres-embed-preview');
+  const code    = document.getElementById('pres-embed-code');
+  if (!url) { preview.style.display='none'; return; }
+  let embed = '';
+  // Google Slides
+  if (url.includes('docs.google.com/presentation')) {
+    const base = url.split('/pub')[0].split('/edit')[0].split('/preview')[0];
+    embed = `<iframe src="${base}/embed?start=false&loop=false&delayms=3000" width="100%" height="480" frameborder="0" allowfullscreen></iframe>`;
+  }
+  // Canva
+  else if (url.includes('canva.com')) {
+    embed = `<iframe src="${url}" width="100%" height="480" frameborder="0" allowfullscreen></iframe>`;
+  }
+  // SlideShare
+  else if (url.includes('slideshare.net')) {
+    embed = `<iframe src="https://www.slideshare.net/slideshow/embed_code/${url.split('/').pop()}" width="100%" height="480" frameborder="0" scrolling="no" allowfullscreen></iframe>`;
+  }
+  else {
+    embed = `<iframe src="${url}" width="100%" height="480" frameborder="0" allowfullscreen></iframe>`;
+  }
+  code.value = embed;
+  preview.style.display = 'block';
+}
+
+// ── Generar embed de formulario automáticamente ────────────
+function generarEmbedFormulario(url) {
+  const preview = document.getElementById('form-embed-preview');
+  const code    = document.getElementById('form-embed-code');
+  if (!url) { preview.style.display='none'; return; }
+  let embed = '';
+  // Google Forms
+  if (url.includes('docs.google.com/forms') || url.includes('forms.gle')) {
+    const embedUrl = url.replace('/viewform', '/viewform?embedded=true')
+                        .replace('/edit', '/viewform?embedded=true');
+    embed = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0">Cargando formulario...</iframe>`;
+  }
+  // Typeform
+  else if (url.includes('typeform.com')) {
+    embed = `<iframe src="${url}" width="100%" height="500" frameborder="0" allow="camera; microphone; autoplay; encrypted-media;"></iframe>`;
+  }
+  // Microsoft Forms
+  else if (url.includes('forms.office.com') || url.includes('forms.microsoft.com')) {
+    embed = `<iframe src="${url}" width="100%" height="600" frameborder="0">Cargando formulario...</iframe>`;
+  }
+  else {
+    embed = `<iframe src="${url}" width="100%" height="500" frameborder="0"></iframe>`;
+  }
+  code.value = embed;
+  preview.style.display = 'block';
+}
+
+// ── Seleccionar herramienta interactiva ───────────────────
+function setInteractivoUrl(url) {
+  document.getElementById('interactivo-url').value = url;
+  document.getElementById('interactivo-url').focus();
+  document.querySelectorAll('.recurso-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+// ── Modal de edición rápida ───────────────────────────────
+function abrirEditar(id, dataEncoded) {
+  const data = JSON.parse(decodeURIComponent(dataEncoded));
+  document.getElementById('edit-id').value       = id;
+  document.getElementById('edit-titulo').value   = data.titulo || '';
+  document.getElementById('edit-desc').value     = data.descripcion || '';
+  document.getElementById('edit-unidad').value   = data.unidad || '';
+  document.getElementById('edit-orden').value    = data.orden || 0;
+  document.getElementById('edit-oblig').checked  = !!data.obligatorio;
+  document.getElementById('modal-editar').showModal();
+}
+document.getElementById('modal-editar')?.addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-editar')) document.getElementById('modal-editar').close();
+});
+</script>
+
+<%# ===== MODAL EDICIÓN RÁPIDA ===== %>
+<dialog id="modal-editar" style="border:none;border-radius:16px;padding:0;width:480px;max-width:95vw;box-shadow:0 24px 60px rgba(0,0,0,0.2)">
+  <form method="POST" id="form-editar">
+    <input type="hidden" id="edit-id" name="_id">
+    <div style="padding:1.5rem;border-bottom:1px solid #F1F5F9">
+      <h3 style="font-size:17px;font-weight:700;color:#0F172A">✏️ Editar contenido</h3>
+    </div>
+    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem">
+      <div class="form-group">
+        <label class="form-label">Título *</label>
+        <input type="text" id="edit-titulo" name="titulo" required class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <textarea id="edit-desc" name="descripcion" rows="2" class="form-control"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label class="form-label">Unidad</label>
+          <select id="edit-unidad" name="unidad" class="form-control">
+            <option value="">Sin unidad</option>
+            <option value="Unidad 1">Unidad 1</option>
+            <option value="Unidad 2">Unidad 2</option>
+            <option value="Unidad 3">Unidad 3</option>
+            <option value="Unidad 4">Unidad 4</option>
+            <option value="Unidad 5">Unidad 5</option>
+            <option value="Unidad 6">Unidad 6</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Orden</label>
+          <input type="number" id="edit-orden" name="orden" min="0" class="form-control">
+        </div>
+      </div>
+      <label class="checkbox-label">
+        <input type="checkbox" id="edit-oblig" name="obligatorio" value="1">
+        📌 Contenido obligatorio
+      </label>
+    </div>
+    <div style="padding:1rem 1.5rem;border-top:1px solid #F1F5F9;display:flex;gap:.75rem;justify-content:flex-end">
+      <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-editar').close()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">✓ Guardar cambios</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+// Redirigir el form de edición al action correcto con el id
+document.getElementById('form-editar')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-id').value;
+  this.action = '/docente/contenidos/' + id + '/editar';
+  this.submit();
+});
+</script>
+
+<%- include('../partials/footer') %>

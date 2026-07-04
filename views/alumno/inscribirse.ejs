@@ -1,0 +1,10 @@
+<% const titulo='Inscribirse' %><%- include('../partials/header') %>
+
+<div class="content"><div class="page-header"><div><h1>Inscribirse a un aula</h1><p>Pedile el código de acceso a tu docente</p></div></div>
+<div class="card" style="max-width:400px">
+<% if(error){ %><div class="alert alert-error"><%= error %></div><% } %>
+<form method="POST" action="/alumno/inscribirse">
+  <div class="form-group"><label class="form-label">Código de acceso</label><input type="text" name="codigo" maxlength="6" placeholder="ej: ABC123" required style="text-transform:uppercase;font-size:24px;letter-spacing:4px;text-align:center" autofocus></div>
+  <button type="submit" class="btn btn-primary btn-full">Inscribirse →</button>
+</form>
+</div></div><%- include('../partials/footer') %>

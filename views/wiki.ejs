@@ -1,0 +1,12 @@
+<% const titulo=wiki.titulo %><%- include('partials/header') %>
+
+<div class="content">
+<div class="wiki-page">
+  <h2>📖 <%= wiki.titulo %></h2>
+  <div class="wiki-page-meta">
+    Creado por <strong><%= wiki.autor %></strong> · <%= new Date(wiki.creado_en).toLocaleDateString('es-AR') %>
+    <% if(wiki.editor){ %> · Última edición por <strong><%= wiki.editor %></strong> el <%= new Date(wiki.editado_en).toLocaleDateString('es-AR') %><% } %>
+  </div>
+  <div class="wiki-content"><%= wiki.contenido %></div>
+</div>
+</div><%- include('partials/footer') %>

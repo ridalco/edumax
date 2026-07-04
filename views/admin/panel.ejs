@@ -1,0 +1,19 @@
+<% const titulo='Admin' %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Panel de administración</h1></div></div>
+<div class="stats-row">
+  <div class="stat" style="--accent:#148f77"><div class="stat-label">Docentes</div><div class="stat-val"><%= stats.docentes %></div></div>
+  <div class="stat" style="--accent:#3498db"><div class="stat-label">Alumnos</div><div class="stat-val"><%= stats.alumnos %></div></div>
+  <div class="stat" style="--accent:#e67e22"><div class="stat-label">Aulas</div><div class="stat-val"><%= stats.aulas %></div></div>
+  <div class="stat" style="--accent:#9b59b6"><div class="stat-label">Mensajes</div><div class="stat-val"><%= stats.mensajes %></div></div>
+</div>
+<div class="card"><div class="card-title">Últimos usuarios registrados <a href="/admin/usuarios" class="btn btn-sm btn-secondary">Ver todos</a></div>
+<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Fecha</th></tr></thead>
+<tbody><% users.forEach(u=>{ %>
+<tr><td><strong><%= u.apellido %>, <%= u.nombre %></strong></td><td style="font-size:13px"><%= u.email %></td>
+<td><span class="badge <%=u.rol==='docente'?'badge-blue':u.rol==='admin'?'badge-purple':'badge-gray'%>"><%= u.rol %></span></td>
+<td><span class="badge <%=u.activo?'badge-green':'badge-red'%>"><%=u.activo?'Activo':'Inactivo'%></span></td>
+<td style="font-size:12px"><%= new Date(u.creado_en).toLocaleDateString('es-AR') %></td>
+</tr><% }) %></tbody></table></div>
+</div></div><%- include('../partials/footer') %>

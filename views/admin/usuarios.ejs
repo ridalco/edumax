@@ -1,0 +1,52 @@
+<% const titulo='Usuarios' %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Gestión de usuarios</h1><p><%= total %> usuarios registrados<% if(q){ %> · filtrando por “<%= q %>”<% } %></p></div><a href="/admin/auditoria" class="btn btn-secondary">🛡️ Auditoría</a></div>
+
+<form method="GET" style="display:flex;gap:8px;margin-bottom:1rem;max-width:420px">
+  <input type="text" name="q" value="<%= q %>" placeholder="Buscar por nombre, apellido o email..." style="flex:1">
+  <button type="submit" class="btn btn-secondary">Buscar</button>
+  <% if(q){ %><a href="/admin/usuarios" class="btn btn-secondary">✕</a><% } %>
+</form>
+<% if(resetInfo){ %>
+<div class="alert alert-success" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+  <span>🔑 Nueva contraseña temporal para <strong><%= resetInfo.nombre %></strong> (<%= resetInfo.email %>):</span>
+  <code style="background:#fff;border:1px solid #BBF7D0;padding:4px 12px;border-radius:6px;font-size:15px;font-weight:700;letter-spacing:1px"><%= resetInfo.temp %></code>
+  <span style="font-size:13px">Pasásela al usuario y que la cambie desde su perfil al ingresar.</span>
+</div>
+<% } %>
+<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Institución</th><th>Estado</th><th></th></tr></thead>
+<tbody><% users.forEach(u=>{ %>
+<tr>
+  <td><strong><%= u.apellido %>, <%= u.nombre %></strong></td>
+  <td style="font-size:13px"><%= u.email %></td>
+  <td>
+    <form method="POST" action="/admin/usuarios/<%= u.id %>/rol" style="display:inline">
+      <select name="rol" onchange="this.form.submit()" style="font-size:12px;padding:3px 6px;width:auto">
+        <option value="alumno" <%=u.rol==='alumno'?'selected':''%>>Alumno</option>
+        <option value="docente" <%=u.rol==='docente'?'selected':''%>>Docente</option>
+        <option value="admin" <%=u.rol==='admin'?'selected':''%>>Admin</option>
+      </select>
+    </form>
+  </td>
+  <td style="font-size:13px"><%= u.institucion||'-' %></td>
+  <td><span class="badge <%=u.activo?'badge-green':'badge-red'%>"><%=u.activo?'Activo':'Inactivo'%></span></td>
+  <td>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <form method="POST" action="/admin/usuarios/<%= u.id %>/toggle" style="display:inline">
+      <button type="submit" class="btn btn-sm <%=u.activo?'btn-danger':'btn-secondary'%>"><%=u.activo?'Desactivar':'Activar'%></button>
+    </form>
+    <form method="POST" action="/admin/usuarios/<%= u.id %>/reset-password" style="display:inline" onsubmit="return confirm('¿Generar una contraseña temporal para <%= u.nombre %> <%= u.apellido %>?')">
+      <button type="submit" class="btn btn-sm btn-secondary">🔑 Reset clave</button>
+    </form>
+    </div>
+  </td>
+</tr><% }) %></tbody></table></div>
+<% if(paginas>1){ %>
+<div style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:1rem">
+  <% if(pagina>1){ %><a href="?p=<%= pagina-1 %><%= q?'&q='+encodeURIComponent(q):'' %>" class="btn btn-sm btn-secondary">← Anterior</a><% } %>
+  <span style="font-size:13px;color:#64748B">Página <%= pagina %> de <%= paginas %></span>
+  <% if(pagina<paginas){ %><a href="?p=<%= pagina+1 %><%= q?'&q='+encodeURIComponent(q):'' %>" class="btn btn-sm btn-secondary">Siguiente →</a><% } %>
+</div>
+<% } %>
+</div><%- include('../partials/footer') %>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 110">
+  <defs>
+    <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D4F0"/>
+      <stop offset="100%" stop-color="#6E44E8"/>
+    </linearGradient>
+    <linearGradient id="lg2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="100%" stop-color="#00D4F0"/>
+    </linearGradient>
+    <linearGradient id="page" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E0F7FF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#F0EEFF" stop-opacity="0.85"/>
+    </linearGradient>
+  </defs>
+
+  <!-- LIBRO: tapa izquierda -->
+  <path d="M8 82 L8 24 Q8 16 16 14 L52 8 Q58 7 58 14 L58 90 Q58 94 52 95 L14 96 Q8 96 8 82Z"
+        fill="url(#lg1)" opacity="0.95"/>
+  <!-- página izquierda interna -->
+  <path d="M15 80 L15 27 Q15 20 22 18 L52 13 L52 89 L18 90 Q15 90 15 80Z"
+        fill="url(#page)"/>
+
+  <!-- LIBRO: tapa derecha -->
+  <path d="M112 82 L112 24 Q112 16 104 14 L68 8 Q62 7 62 14 L62 90 Q62 94 68 95 L106 96 Q112 96 112 82Z"
+        fill="url(#lg1)" opacity="0.95"/>
+  <!-- página derecha interna -->
+  <path d="M105 80 L105 27 Q105 20 98 18 L68 13 L68 89 L102 90 Q105 90 105 80Z"
+        fill="url(#page)"/>
+
+  <!-- Lomo central -->
+  <rect x="57" y="7" width="6" height="89" rx="2" fill="#1B1060" opacity="0.5"/>
+
+  <!-- ÁRBOL: tronco -->
+  <line x1="60" y1="90" x2="60" y2="52" stroke="url(#lg2)" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- ramas -->
+  <path d="M60 73 Q51 64 43 56" stroke="url(#lg2)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M60 73 Q69 64 77 56" stroke="url(#lg2)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M60 62 Q52 55 46 48" stroke="url(#lg2)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M60 62 Q68 55 74 48" stroke="url(#lg2)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M60 52 Q54 44 48 38" stroke="url(#lg2)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M60 52 Q66 44 72 38" stroke="url(#lg2)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <line x1="60" y1="52" x2="60" y2="35" stroke="url(#lg2)" stroke-width="2" stroke-linecap="round"/>
+  <!-- ramitas finas -->
+  <line x1="48" y1="38" x2="43" y2="31" stroke="url(#lg2)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="48" y1="38" x2="50" y2="29" stroke="url(#lg2)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="72" y1="38" x2="77" y2="31" stroke="url(#lg2)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="72" y1="38" x2="70" y2="29" stroke="url(#lg2)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="60" y1="35" x2="55" y2="27" stroke="url(#lg2)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="60" y1="35" x2="65" y2="27" stroke="url(#lg2)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="43" y1="56" x2="37" y2="51" stroke="url(#lg2)" stroke-width="1.3" stroke-linecap="round"/>
+  <line x1="77" y1="56" x2="83" y2="51" stroke="url(#lg2)" stroke-width="1.3" stroke-linecap="round"/>
+
+  <!-- TEXTO: "Edu" blanco + "Max" cyan -->
+  <text x="130" y="70" font-family="'Arial Black',Arial,sans-serif" font-size="52" font-weight="900" letter-spacing="-2" fill="white">Edu</text>
+  <text x="226" y="70" font-family="'Arial Black',Arial,sans-serif" font-size="52" font-weight="900" letter-spacing="-2" fill="url(#lg1)">Max</text>
+  <!-- Subtítulo -->
+  <text x="131" y="91" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="3.5" fill="#94A3B8">CAMPUS VIRTUAL</text>
+</svg>

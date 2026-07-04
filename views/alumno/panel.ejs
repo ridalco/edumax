@@ -1,0 +1,95 @@
+<% const titulo='Mis aulas' %><%- include('../partials/header') %>
+<div class="content">
+<div class="page-header">
+  <div>
+    <h1>Hola, <%= user.nombre %> 👋</h1>
+    <p>Tus aulas virtuales · <%= aulas.length %> cursando</p>
+  </div>
+  <div class="header-actions">
+    <a href="/alumno/inscribirse" class="btn btn-primary">+ Inscribirme a un aula</a>
+  </div>
+</div>
+
+<%# Stats %>
+<div class="stats-row">
+  <div class="stat" style="--accent:#6366F1"><div class="stat-label">Aulas</div><div class="stat-val"><%= aulas.length %></div><div class="stat-sub">cursando</div></div>
+  <div class="stat" style="--accent:#F59E0B"><div class="stat-label">Por entregar</div><div class="stat-val"><%= pendientes.length %></div><div class="stat-sub">tareas</div></div>
+  <div class="stat" style="--accent:#EC4899"><div class="stat-label">Mensajes</div><div class="stat-val"><%= mensajesNoLeidos %></div><div class="stat-sub">sin leer</div></div>
+</div>
+
+<% if((typeof notasNuevas!=='undefined' && notasNuevas.length) || (typeof contenidoNuevo!=='undefined' && contenidoNuevo.length)){ %>
+<h2 style="font-size:18px;font-weight:800;color:#0F172A;margin:1.25rem 0 .75rem;letter-spacing:-.3px">🔔 Novedades</h2>
+<div class="card">
+  <% (notasNuevas||[]).forEach(n=>{ %>
+  <div class="list-item">
+    <div class="list-left">
+      <div class="list-title">📊 Te calificaron: <%= n.titulo %></div>
+      <div class="list-sub"><%= n.aula_nombre %> · Nota: <strong style="color:#15803D"><%= n.nota %></strong><% if(n.feedback){ %> · 💬 con devolución<% } %></div>
+    </div>
+    <a href="/alumno/actividades/<%= n.actividad_id %>/entregar" class="btn btn-sm btn-secondary">Ver →</a>
+  </div>
+  <% }) %>
+  <% (contenidoNuevo||[]).forEach(c=>{ %>
+  <div class="list-item">
+    <div class="list-left">
+      <div class="list-title">🆕 <%= c.titulo %></div>
+      <div class="list-sub">Contenido nuevo en <%= c.aula_nombre %></div>
+    </div>
+    <a href="/contenidos/<%= c.id %>/ver" class="btn btn-sm btn-secondary">Abrir →</a>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+
+<h2 style="font-size:18px;font-weight:800;color:#0F172A;margin:1rem 0 .75rem;letter-spacing:-.3px">📚 Mis aulas</h2>
+
+<% if(!aulas.length){ %>
+  <div class="card"><div class="empty-state">
+    <span class="icon">🎓</span>
+    <h3>Todavía no estás inscripto en ninguna aula</h3>
+    <p>Pedile el código a tu docente y inscribite</p>
+    <a href="/alumno/inscribirse" class="btn btn-primary">+ Inscribirme con código</a>
+  </div></div>
+<% } else { %>
+<div class="aulas-grid">
+<% aulas.forEach(a=>{
+  const bn = ((a.id % 8) + 1);
+  const icons = ['📐','🧪','📖','🌍','💡','🎨','💻','⚙️'];
+  const ico = icons[a.id % icons.length];
+  const prog = a.progreso || 0;
+%>
+  <a href="/alumno/aulas/<%= a.id %>" class="aula-card-edu">
+    <div class="aula-banner aula-banner-<%= bn %>">
+      <span class="aula-banner-icon"><%= ico %></span>
+      <div class="aula-progress-ring <%= prog>0?'has-progress':'' %>"><%= prog %>%</div>
+    </div>
+    <div class="aula-card-body">
+      <div class="aula-card-edu-title"><%= a.nombre %></div>
+      <div class="aula-card-edu-meta">Docente: <%= a.docente %></div>
+      <div class="aula-card-edu-foot">
+        <span><%= a.nivel||'' %> <%= a.anio||'' %></span>
+        <span style="background:#EEF2FF;color:#4338CA;padding:3px 10px;border-radius:12px;font-weight:600;font-size:11px">▶ Entrar</span>
+      </div>
+    </div>
+    <div class="aula-card-strip <%= prog>0?'iniciada':'nueva' %>"></div>
+  </a>
+<% }) %>
+</div>
+<% } %>
+
+<% if(pendientes.length){ %>
+<h2 style="font-size:18px;font-weight:800;color:#0F172A;margin:2rem 0 .75rem;letter-spacing:-.3px">⏰ Tareas pendientes</h2>
+<div class="card">
+<% pendientes.forEach(p=>{ %>
+  <div class="list-item">
+    <div class="list-left">
+      <div class="list-title"><%= p.titulo %></div>
+      <div class="list-sub"><%= p.aula_nombre %><% if(p.fecha_entrega){ %> · Entrega: <%= new Date(p.fecha_entrega).toLocaleDateString('es-AR') %><% } %></div>
+    </div>
+    <a href="/alumno/actividades/<%= p.id %>/entregar" class="btn btn-sm btn-primary">Hacer →</a>
+  </div>
+<% }) %>
+</div>
+<% } %>
+
+</div><%- include('../partials/footer') %>

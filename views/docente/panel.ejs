@@ -1,0 +1,108 @@
+<% const titulo='Mis aulas' %><%- include('../partials/header') %>
+<div class="content">
+<div class="page-header">
+  <div>
+    <h1>Hola, <%= user.nombre %> 👋</h1>
+    <p><%= user.materia||user.institucion||'Panel del docente' %> · <%= aulas.length %> aulas activas</p>
+  </div>
+  <div class="header-actions">
+    <a href="/docente/aulas/nueva" class="btn btn-primary">+ Nueva aula</a>
+  </div>
+</div>
+
+<%# Stats compactas %>
+<div class="stats-row">
+  <div class="stat" style="--accent:#6366F1"><div class="stat-label">Aulas</div><div class="stat-val"><%= aulas.length %></div><div class="stat-sub">activas</div></div>
+  <div class="stat" style="--accent:#3B82F6"><div class="stat-label">Alumnos totales</div><div class="stat-val"><%= aulas.reduce((s,a)=>s+a.cant,0) %></div><div class="stat-sub">inscriptos</div></div>
+  <div class="stat" style="--accent:#F59E0B"><div class="stat-label">Por calificar</div><div class="stat-val"><%= pendientes.length %></div><div class="stat-sub">entregas</div></div>
+  <div class="stat" style="--accent:#EC4899"><div class="stat-label">Mensajes</div><div class="stat-val"><%= mensajesNoLeidos %></div><div class="stat-sub">sin leer</div></div>
+</div>
+
+<h2 style="font-size:18px;font-weight:800;color:#122658;margin:1rem 0 .75rem;letter-spacing:-.3px">📚 Mis aulas</h2>
+
+<%# Barra de búsqueda y filtros estilo Educativa %>
+<% if(aulas.length){ %>
+<div class="aulas-toolbar">
+  <div class="aulas-search">
+    <span class="aulas-search-icon">🔍</span>
+    <input type="text" id="buscar-aula" placeholder="Buscar aula..." onkeyup="filtrarAulas(this.value)">
+  </div>
+  <div class="aulas-filter">
+    <span>Orden:</span>
+    <select onchange="ordenarAulas(this.value)">
+      <option value="nombre">Nombre</option>
+      <option value="alumnos">Más alumnos</option>
+      <option value="reciente">Más reciente</option>
+    </select>
+  </div>
+</div>
+<% } %>
+
+<% if(!aulas.length){ %>
+  <div class="card"><div class="empty-state">
+    <span class="icon">🎓</span>
+    <h3>Todavía no tenés aulas</h3>
+    <p>Creá tu primera aula virtual para empezar a dar clases. Vas a poder subir contenidos, evaluar y comunicarte con tus alumnos.</p>
+    <a href="/docente/aulas/nueva" class="btn btn-primary">+ Crear primera aula</a>
+  </div></div>
+<% } else { %>
+<div class="aulas-grid" id="grid-aulas">
+<% aulas.forEach((a,i)=>{
+  const bn = ((a.id % 8) + 1);
+  const icons = ['📐','🧪','📖','🌍','💡','🎨','💻','⚙️'];
+  const ico = icons[a.id % icons.length];
+  const strip = a.cant > 0 ? 'activa' : 'nueva';
+%>
+  <a href="/docente/aulas/<%= a.id %>" class="aula-card-edu" data-nombre="<%= a.nombre.toLowerCase() %>" data-alumnos="<%= a.cant %>" data-id="<%= a.id %>">
+    <div class="aula-banner aula-banner-<%= bn %>">
+      <span class="aula-banner-icon"><%= ico %></span>
+      <div class="aula-progress-ring <%= a.cant>0?'has-progress':'' %>"><%= a.cant %></div>
+    </div>
+    <div class="aula-card-body">
+      <div class="aula-card-edu-title"><%= a.nombre %></div>
+      <div class="aula-card-edu-meta"><%= a.nivel||'' %> <%= a.anio||'' %> · <%= a.cant %> alumno<%= a.cant!==1?'s':'' %></div>
+      <div class="aula-card-edu-foot">
+        <span>Código: <strong style="color:#4F46E5"><%= a.codigo_acceso %></strong></span>
+        <span style="background:#EEF2FF;color:#4338CA;padding:3px 10px;border-radius:12px;font-weight:600;font-size:11px">Entrar →</span>
+      </div>
+    </div>
+    <div class="aula-card-strip <%= strip %>"></div>
+  </a>
+<% }) %>
+</div>
+<script>
+function filtrarAulas(q){
+  q = q.toLowerCase();
+  document.querySelectorAll('#grid-aulas .aula-card-edu').forEach(c=>{
+    c.style.display = c.dataset.nombre.includes(q) ? '' : 'none';
+  });
+}
+function ordenarAulas(modo){
+  const grid = document.getElementById('grid-aulas');
+  const cards = [...grid.children];
+  cards.sort((a,b)=>{
+    if(modo==='nombre') return a.dataset.nombre.localeCompare(b.dataset.nombre);
+    if(modo==='alumnos') return b.dataset.alumnos - a.dataset.alumnos;
+    if(modo==='reciente') return b.dataset.id - a.dataset.id;
+  });
+  cards.forEach(c=>grid.appendChild(c));
+}
+</script>
+<% } %>
+
+<% if(pendientes.length){ %>
+<h2 style="font-size:18px;font-weight:800;color:#0F172A;margin:2rem 0 .75rem;letter-spacing:-.3px">📝 Entregas por calificar</h2>
+<div class="card">
+<% pendientes.forEach(e=>{ %>
+  <div class="list-item">
+    <div class="list-left">
+      <div class="list-title"><%= e.alumno %></div>
+      <div class="list-sub"><%= e.act_titulo %> · <%= e.aula_nombre %></div>
+    </div>
+    <a href="/docente/actividades/<%= e.actividad_id %>" class="btn btn-sm btn-primary">Calificar →</a>
+  </div>
+<% }) %>
+</div>
+<% } %>
+
+</div><%- include('../partials/footer') %>

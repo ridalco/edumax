@@ -1,0 +1,83 @@
+<% const titulo='Preguntas - '+ev.titulo %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1><%= ev.titulo %></h1><p><%= ev.aula_nombre %> · <%= preguntas.length %> preguntas</p></div></div>
+<div class="grid-2">
+<div>
+  <div class="card">
+    <div class="card-title">Agregar pregunta</div>
+    <form method="POST" action="/docente/evaluaciones/<%= ev.id %>/preguntas" id="form-preg">
+      <div class="form-group"><label class="form-label">Tipo</label>
+        <select name="tipo" id="tipo-preg" onchange="togglePregTipo(this.value)">
+          <option value="mc">Opción múltiple</option>
+          <option value="vf">Verdadero / Falso</option>
+          <option value="libre">Respuesta libre</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Pregunta *</label><textarea name="texto" rows="3" required></textarea></div>
+      <div id="opciones-mc" class="form-group">
+        <label class="form-label">Opciones (una por línea)</label>
+        <textarea name="opciones_raw" rows="4" placeholder="Opción A&#10;Opción B&#10;Opción C&#10;Opción D"></textarea>
+      </div>
+      <div id="respuesta-mc" class="form-group">
+        <label class="form-label">Respuesta correcta (exactamente como está arriba)</label>
+        <input type="text" name="respuesta_correcta" placeholder="ej: Opción A">
+      </div>
+      <div id="respuesta-vf" class="form-group" style="display:none">
+        <label class="form-label">Respuesta correcta</label>
+        <select name="respuesta_vf"><option value="verdadero">Verdadero</option><option value="falso">Falso</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Puntaje</label><input type="number" name="puntaje" value="1" min="1" max="100"></div>
+      <input type="hidden" name="opciones" id="hidden-opciones">
+      <button type="submit" class="btn btn-primary btn-full" onclick="prepararPregunta()">Agregar pregunta</button>
+    </form>
+  </div>
+</div>
+
+<div>
+  <div class="card">
+    <div class="card-title">Preguntas (<%= preguntas.length %>)</div>
+    <% if(!preguntas.length){ %>
+      <div class="empty-state"><span class="icon">❓</span><h3>Sin preguntas todavía</h3><p>Agregá la primera pregunta usando el formulario de abajo.</p></div>
+    <% } else { preguntas.forEach((p,i)=>{ %>
+      <div class="pregunta" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="font-weight:600;font-size:13px"><%= i+1 %>. <%= p.texto %></div>
+          <form method="POST" action="/docente/preguntas/<%= p.id %>/eliminar" style="margin-left:8px" onsubmit="return confirm('¿Eliminar esta pregunta?')">
+            <button type="submit" class="btn btn-sm btn-danger" data-confirm="¿Eliminar pregunta?">✕</button>
+          </form>
+        </div>
+        <div style="margin-top:6px;font-size:12px">
+          <span class="badge badge-purple"><%= {mc:'Múltiple opción',vf:'V/F',libre:'Libre'}[p.tipo] %></span>
+          <span class="badge badge-blue"><%= p.puntaje %> pt</span>
+          <% if(p.respuesta_correcta && p.tipo!=='libre'){ %><span class="badge badge-green">✓ <%= p.respuesta_correcta %></span><% } %>
+        </div>
+        <% if(p.opciones){ %>
+          <ul style="margin-top:8px;padding-left:1.25rem;font-size:13px;color:#374151">
+            <% JSON.parse(p.opciones).forEach(op=>{ %><li><%= op %></li><% }) %>
+          </ul>
+        <% } %>
+      </div>
+    <% }) } %>
+  </div>
+</div>
+</div></div>
+
+<script>
+function togglePregTipo(tipo){
+  document.getElementById('opciones-mc').style.display=tipo==='mc'?'':'none';
+  document.getElementById('respuesta-mc').style.display=tipo==='mc'?'':'none';
+  document.getElementById('respuesta-vf').style.display=tipo==='vf'?'':'none';
+}
+function prepararPregunta(){
+  const tipo=document.getElementById('tipo-preg').value;
+  if(tipo==='mc'){
+    const raw=document.querySelector('[name=opciones_raw]').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    document.getElementById('hidden-opciones').value=JSON.stringify(raw);
+  } else if(tipo==='vf'){
+    document.getElementById('hidden-opciones').value='["Verdadero","Falso"]';
+    document.querySelector('[name=respuesta_correcta]').value=document.querySelector('[name=respuesta_vf]').value;
+  }
+}
+</script>
+<%- include('../partials/footer') %>

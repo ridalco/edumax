@@ -1,0 +1,86 @@
+<% const titulo='Asistente IA' %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Asistente IA para docentes ✨</h1><p>Generá exámenes, planificá clases y resolvé dudas con inteligencia artificial</p></div></div>
+
+<div class="tabs" data-tabs>
+  <button class="tab-btn active" data-tab="generar">🎯 Generar examen</button>
+  <button class="tab-btn" data-tab="asistente">💬 Asistente</button>
+</div>
+
+<div id="tab-generar" class="tab-content active">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Configurar examen</div>
+    <form method="POST" action="/docente/ia/generar">
+      <div class="form-group"><label class="form-label">Materia *</label><input type="text" name="materia" value="<%= consulta?.materia||'' %>" placeholder="ej: Electrónica Analógica" required></div>
+      <div class="form-group"><label class="form-label">Tema *</label><input type="text" name="tema" value="<%= consulta?.tema||'' %>" placeholder="ej: Amplificadores operacionales" required></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nivel</label>
+          <select name="nivel">
+            <option>3er año secundario</option><option>4to año secundario</option><option>5to año secundario</option>
+            <option>1er año terciario</option><option>2do año terciario</option><option>3er año terciario</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Tipo</label>
+          <select name="tipo">
+            <option>Parcial escrito</option><option>Trabajo práctico</option><option>Evaluación integradora</option>
+            <option>Recuperatorio</option><option>Quiz rápido</option>
+          </select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Cantidad</label>
+          <select name="cantidad"><option value="3">3 ejercicios</option><option value="5" selected>5</option><option value="8">8</option><option value="10">10</option></select></div>
+        <div class="form-group"><label class="form-label">Dificultad</label>
+          <select name="dificultad"><option>Básica</option><option selected>Intermedia</option><option>Avanzada</option><option>Mixta</option></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Guardar en aula (opcional)</label>
+        <select name="aula_id"><option value="">No guardar</option><% aulas.forEach(a=>{ %><option value="<%= a.id %>"><%= a.nombre %></option><% }) %></select></div>
+      <div class="form-group"><label class="form-label">Indicaciones adicionales</label><textarea name="extras" rows="3" placeholder="ej: incluir problemas numéricos con cálculos..."></textarea></div>
+      <button type="submit" class="btn btn-primary btn-full" data-loading="⏳ Generando con IA...">✨ Generar examen</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="card-title">Resultado</div>
+    <% if(respuesta && consulta && consulta.materia){ %>
+      <% if(examGuardado){ %><div class="alert alert-success">✅ Guardado en el aula como evaluación</div><% } %>
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:1.25rem;font-size:13px;white-space:pre-wrap;max-height:500px;overflow-y:auto;line-height:1.7"><%= respuesta %></div>
+      <div style="display:flex;gap:8px;margin-top:1rem">
+        <button onclick="navigator.clipboard.writeText(document.querySelector('pre,div[style*=pre-wrap]').innerText).then(()=>alert('Copiado!'))" class="btn btn-secondary btn-sm">📋 Copiar</button>
+        <button onclick="window.print()" class="btn btn-secondary btn-sm">🖨️ Imprimir</button>
+      </div>
+    <% } else if(respuesta){ %>
+      <div class="alert alert-error"><%= respuesta %></div>
+    <% } else { %>
+      <div class="empty-state"><h3>El resultado aparecerá acá</h3><p>Completá el formulario y generá con IA</p></div>
+    <% } %>
+  </div>
+</div>
+</div>
+
+<div id="tab-asistente" class="tab-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Consultá a la IA</div>
+    <form method="POST" action="/docente/ia/asistente">
+      <div class="form-group"><label class="form-label">¿Qué necesitás?</label>
+        <textarea name="consulta" rows="8" placeholder="ej:&#10;- Armame un plan de clase de 80 min sobre transistores BJT&#10;- Sugerí actividades prácticas para electrónica&#10;- Cómo explicar el teorema de Thévenin" required></textarea></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem">
+        <button type="button" class="btn btn-sm btn-secondary" onclick="document.querySelector('[name=consulta]').value='Plan de clase de 80 minutos sobre amplificadores operacionales para 4to año terciario'">📚 Plan de clase</button>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="document.querySelector('[name=consulta]').value='5 actividades prácticas de laboratorio para electrónica digital'">🔬 Actividades</button>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="document.querySelector('[name=consulta]').value='10 preguntas de verdadero/falso sobre semiconductores con respuestas'">❓ Preguntas V/F</button>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" data-loading="⏳ Pensando...">✨ Consultar</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="card-title">Respuesta</div>
+    <% if(respuesta && (!consulta || !consulta.materia)){ %>
+      <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:1.25rem;font-size:13px;white-space:pre-wrap;max-height:500px;overflow-y:auto;line-height:1.7"><%= respuesta %></div>
+      <button onclick="navigator.clipboard.writeText(document.querySelector('div[style*=pre-wrap]').innerText)" class="btn btn-secondary btn-sm" style="margin-top:1rem">📋 Copiar</button>
+    <% } else { %>
+      <div class="empty-state"><span class="icon">🤖</span><h3>La respuesta aparecerá acá</h3><p>Escribí tu consulta o generá material y el asistente te va a responder.</p></div>
+    <% } %>
+  </div>
+</div>
+</div>
+</div><%- include('../partials/footer') %>

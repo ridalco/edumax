@@ -1,0 +1,25 @@
+<% const titulo=foro.titulo %><%- include('partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>💬 <%= foro.titulo %></h1><p><%= foro.aula_nombre %> · <%= foro.descripcion||'' %></p></div><button class="btn btn-primary" onclick="document.getElementById('modal-hilo').showModal()">+ Nuevo hilo</button></div>
+<% if(!hilos.length){ %><div class="card"><div class="empty-state"><h3>Sin hilos todavía</h3><p>¡Sé el primero en abrir un tema!</p></div></div>
+<% } else { hilos.forEach(h=>{ %>
+  <a href="/foros/hilos/<%= h.id %>" style="text-decoration:none">
+    <div class="hilo-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="font-weight:600;font-size:15px;color:#1a2332"><%= h.fijado?'📌 ':'' %><%= h.titulo %></div>
+        <span class="badge badge-gray"><%= h.respuestas %> resp.</span>
+      </div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:6px">Por <%= h.autor %> · <%= new Date(h.creado_en).toLocaleDateString('es-AR') %></div>
+    </div>
+  </a>
+<% }) } %>
+<dialog id="modal-hilo">
+  <h2>Nuevo hilo</h2>
+  <form method="POST" action="/foros/<%= foro.id %>/hilos">
+    <div class="form-group"><label class="form-label">Título *</label><input type="text" name="titulo" required></div>
+    <div class="form-group"><label class="form-label">Mensaje *</label><textarea name="cuerpo" rows="6" required></textarea></div>
+    <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Cancelar</button><button type="submit" class="btn btn-primary">Publicar</button></div>
+  </form>
+</dialog>
+</div><%- include('partials/footer') %>

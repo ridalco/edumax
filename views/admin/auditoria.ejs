@@ -1,0 +1,24 @@
+<% const titulo='Auditoría' %><%- include('../partials/header') %>
+
+<div class="content">
+<div class="page-header"><div><h1>Registro de auditoría</h1><p>Últimas 200 acciones sensibles (borrados, reseteos de contraseña, etc.)</p></div><a href="/admin/usuarios" class="btn btn-secondary">← Usuarios</a></div>
+
+<% if(!registros.length){ %>
+  <div class="card"><div class="empty-state"><span class="icon">🛡️</span><h3>Sin registros todavía</h3><p>Acá van a aparecer las acciones importantes: aulas eliminadas, contraseñas reseteadas, etc.</p></div></div>
+<% } else { %>
+<div class="table-wrap"><table>
+  <thead><tr><th>Fecha</th><th>Quién</th><th>Acción</th><th>Detalle</th></tr></thead>
+  <tbody>
+  <% const etiquetas={eliminar_aula:'🗑️ Eliminó aula',reset_password_admin:'🔑 Reseteó clave (admin)',reset_password_docente:'🔑 Reseteó clave (docente)'}; %>
+  <% registros.forEach(r=>{ %>
+    <tr>
+      <td style="font-size:12px;white-space:nowrap"><%= new Date(r.creado_en + 'Z').toLocaleString('es-AR') %></td>
+      <td style="font-size:13px"><%= r.user_nombre || '—' %></td>
+      <td><span class="badge badge-blue"><%= etiquetas[r.accion] || r.accion %></span></td>
+      <td style="font-size:13px;color:#475569"><%= r.detalle || '' %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div>
+<% } %>
+</div><%- include('../partials/footer') %>
